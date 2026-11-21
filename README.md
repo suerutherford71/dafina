@@ -47,4 +47,4 @@ Free to use, including for client and commercial work. Please don't sell it or p
 
 Dafina is an independent project that works with Claude. It isn't made, endorsed or supported by Anthropic.
 
-Made by Sue Rutherford. If Dafina saves you time, you can [buy me a coffee](https://ko-fi.com/YOUR-NAME).
+Made by Sue Rutherford. If Dafina saves you time, you can [buy me a coffee](https://ko-fi.com/suerutherford).

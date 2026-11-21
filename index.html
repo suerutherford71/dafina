@@ -1,0 +1,1349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dafina</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23171717'/%3E%3Ccircle cx='31.5' cy='38.5' r='14.5' fill='none' stroke='%23f2f2f2' stroke-width='6.5'/%3E%3Crect x='42.5' y='6' width='7.5' height='50' rx='3.75' fill='%23f2f2f2'/%3E%3Ccircle cx='31.5' cy='38.5' r='7' fill='%237fb7d9'/%3E%3C/svg%3E">
+<script>try{var t=localStorage.getItem("dafina-theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f2f2f2; --white:#ffffff; --ink:#171717; --ink-2:rgba(0,0,0,.55); --ink-3:rgba(0,0,0,.4);
+    --line:rgba(0,0,0,.08); --stone:#dfded6;
+    --blue:#b4c8f6; --yellow:#fde3a0; --peach:#f4deb7; --pink:#f7c2c2; --mint:#c4e6d4; --lilac:#dcd2f4; --orange:#f9cb86; --sky:#cfe3f0;
+    --green:#1cc691; --coral:#ff6b4a;
+    --hover:#e8e8e8; --on-ink-2:rgba(255,255,255,.6); --on-ink-line:rgba(255,255,255,.25); --chip:rgba(255,255,255,.6); --media:rgba(255,255,255,.45); --media-fit:rgba(255,255,255,.72); --text-2:#333; --dash:rgba(0,0,0,.2); --bad:#fde2dc; --code:rgba(255,255,255,.65); --shadow:rgba(0,0,0,.35);
+    color-scheme:light;
+    --r-lg:16px; --r-md:12px; --r-sm:8px;
+    --sans:"Plus Jakarta Sans", Circular, ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  button,input,select,textarea{font:inherit;color:inherit}
+  button{cursor:pointer}
+  a{color:inherit}
+  .container{max-width:1440px;margin:0 auto;padding:0 20px}
+
+  /* top bar */
+  .marquee{background:var(--ink);color:var(--bg);font-size:13px;font-weight:600;height:34px;overflow:hidden;white-space:nowrap;display:flex;align-items:center}
+  .marquee .track{display:inline-flex;gap:0;animation:scroll 40s linear infinite}
+  .marquee span{padding:0 18px;border-right:1px solid var(--on-ink-line)}
+  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @media (prefers-reduced-motion:reduce){.marquee .track{animation:none}}
+
+  .navbar{height:72px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+  .navbar .left{display:flex;gap:6px;align-items:center}
+  .navbar .right{display:flex;gap:8px;justify-content:flex-end;align-items:center}
+  .logo{font-weight:800;font-size:26px;letter-spacing:-.03em;text-decoration:none;white-space:nowrap}
+  .logo sup{font-size:11px;font-weight:600;vertical-align:super}
+  .searchbox{display:flex;align-items:center;gap:8px;background:var(--white);border-radius:var(--r-md);padding:0 12px;height:44px;width:300px;max-width:100%}
+  .searchbox input{border:0;outline:0;background:none;font-size:15px;font-weight:500;width:100%}
+  .searchbox svg{flex:none;opacity:.6}
+  .btn{display:inline-flex;align-items:center;gap:8px;justify-content:center;height:44px;padding:0 18px;border-radius:var(--r-md);border:0;font-weight:600;font-size:15px;background:var(--white);color:var(--ink);text-decoration:none;white-space:nowrap;transition:transform .12s ease, background .12s}
+  .btn:hover{transform:translateY(-1px)}
+  .modal .btn{background:var(--bg)}
+  .btn.dark,.modal .btn.dark{background:var(--ink);color:var(--bg)}
+  .btn.ghost{background:transparent;box-shadow:inset 0 0 0 1.5px var(--ink)}
+  .btn.sm{height:36px;padding:0 14px;font-size:14px;border-radius:10px}
+  .btn.icon{width:44px;padding:0}
+  .btn.on{background:var(--ink);color:var(--bg)}
+  .btn:disabled{opacity:.45;cursor:default;transform:none}
+  select.btn,select.btn.sm{appearance:none;-webkit-appearance:none;padding-right:36px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23171717' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+
+  /* intro sentence */
+  .intro{font-size:clamp(26px,3.4vw,44px);font-weight:500;line-height:1.18;letter-spacing:-.02em;margin:26px 0 30px;max-width:1100px}
+  .intro.one{max-width:none;white-space:nowrap}
+  @media (max-width:700px){.intro.one{white-space:normal}}
+  .intro b{font-weight:700}
+  .blob{display:inline-block;vertical-align:middle;margin:0 .12em;position:relative;top:-.06em}
+  .blob.dot{width:.62em;height:.62em;border-radius:50%;background:#7fb7d9}
+  .blob.dot.green{background:var(--green)}
+  .blob.pill{width:1.25em;height:.62em;border-radius:1em;background:var(--green)}
+  .blob.flower{width:.7em;height:.7em;background:var(--orange);border-radius:40% 60% 45% 55%/55% 45% 60% 40%}
+  .blob.sq{width:.58em;height:.58em;border-radius:.14em;background:var(--coral);transform:rotate(12deg)}
+
+  /* category pills */
+  .pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .pill{height:38px;padding:0 14px;border-radius:999px;border:0;background:var(--white);font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:7px;transition:background .12s}
+  .pill .n{font-weight:500;color:var(--ink-3);font-size:13px}
+  .pill:hover{background:var(--hover)}
+  .pill.active{background:var(--ink);color:var(--bg)}
+  .pill.active .n{color:var(--on-ink-2)}
+  .pill[data-drag]{cursor:grab}
+  .pill.dragging{opacity:.35;cursor:grabbing}
+  .pill.await{background:var(--yellow)}
+  .pill.await.active{background:var(--ink)}
+  .subrow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0 12px;padding:12px;background:var(--white);border-radius:var(--r-lg)}
+  .subrow .lbl{font-size:13px;font-weight:600;color:var(--ink-3);margin-right:4px}
+  .subrow .pill{background:var(--bg);height:32px;font-size:13px}
+  .subrow .pill.active{background:var(--ink)}
+  .subrow .renamebtn{margin-left:auto;background:transparent;color:var(--ink-2);box-shadow:inset 0 0 0 1.5px var(--line)}
+  .subrow .renamebtn:hover{background:var(--bg);color:var(--ink)}
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 4px}
+  .toolbar .grow{flex:1}
+  .filters{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:14px;font-weight:600;color:var(--ink-2)}
+  .filters .tag{cursor:pointer}
+  .filters .tag::after{content:" ×";opacity:.6}
+
+  /* grid */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;padding:16px 0 60px}
+  .card{border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;position:relative;background:var(--c,var(--white));transition:transform .18s ease}
+  .card:hover{transform:translateY(-3px)}
+  .card .media{margin:12px 12px 0;border-radius:var(--r-md);overflow:hidden;aspect-ratio:4/3;background:var(--media)}
+  .card .media img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  /* everything except page screenshots: show the whole image, not a crop */
+  .card .media.fit{background:var(--media-fit);padding:10px;box-sizing:border-box}
+  .card .media.fit img{object-fit:contain;object-position:center}
+  .card .badges{position:absolute;top:22px;left:58px;display:flex;gap:6px}
+  .badge{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:var(--pink);padding:6px 10px;border-radius:999px;line-height:1}
+  .badge.wait{background:var(--yellow)}
+  .badge.fav{background:var(--white)}
+  .card .tools{position:absolute;top:20px;right:20px;display:flex;gap:6px}
+  .card .go{width:34px;height:34px;border-radius:50%;background:var(--white);display:grid;place-items:center;text-decoration:none;font-weight:700;font-size:15px;color:var(--ink);border:0;padding:0;cursor:pointer;font-family:inherit}
+  .card .go:hover{background:var(--ink);color:var(--white)}
+  .card .go svg{width:16px;height:16px;display:block}
+  .card .info{padding:16px 18px 18px;display:flex;flex-direction:column;gap:12px;flex:1}
+  .card h3{margin:0;font-size:24px;font-weight:600;line-height:1.15;letter-spacing:-.01em}
+  .card h3 .sub{display:block;color:var(--ink-3)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{font-size:13px;font-weight:600;background:var(--chip);padding:6px 10px;border-radius:var(--r-sm);border:0;line-height:1.2}
+  .chip.click:hover{background:var(--white)}
+  .chip.more{background:transparent;color:var(--ink-2);padding-left:2px}
+  .card .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:500;color:var(--ink-2)}
+  .swatches{display:flex;gap:4px}
+  .swatches i{width:14px;height:14px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+
+  .empty{background:var(--white);border-radius:var(--r-lg);padding:56px 28px;text-align:center;grid-column:1/-1}
+  .empty h2{margin:0 0 10px;font-size:30px;font-weight:700;letter-spacing:-.02em}
+  .empty p{margin:6px auto;max-width:640px;color:var(--ink-2);font-size:17px;line-height:1.5;font-weight:500}
+  .ask{display:inline-flex;gap:10px;align-items:center;margin-top:16px;background:var(--yellow);padding:10px 10px 10px 16px;border-radius:var(--r-md);font-weight:600}
+  code{font-family:var(--mono);font-size:.9em}
+
+  /* modal */
+  .scrim{position:fixed;inset:0;background:rgba(23,23,23,.45);backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;padding:32px 16px;overflow:auto;z-index:30}
+  .scrim.open{display:flex}
+  .modal{background:var(--white);border-radius:20px;width:min(1180px,100%);position:relative;overflow:hidden}
+  .modal .hero{background:var(--c,var(--stone));padding:20px;display:flex;justify-content:center;max-height:64vh;overflow:auto}
+  .modal .hero img{max-width:100%;border-radius:var(--r-md);display:block;cursor:zoom-in;align-self:flex-start}
+  .modal .hero.full{max-height:none}
+  .modal .hero.full img{cursor:zoom-out}
+  .mtop{position:absolute;top:14px;right:14px;display:flex;gap:6px;z-index:2}
+  .mtop button{width:40px;height:40px;border-radius:50%;border:0;background:var(--white);font-weight:700;font-size:16px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .mbody{padding:28px 32px 32px;display:flex;flex-direction:column;gap:22px}
+  .mbody h2{margin:0;font-size:clamp(30px,3.4vw,44px);font-weight:600;letter-spacing:-.025em;line-height:1.05}
+  .mbody h2 .sub{display:block;color:var(--ink-3)}
+  .crumbs{font-size:14px;font-weight:600;color:var(--ink-2)}
+  .summary{margin:0;font-size:20px;line-height:1.45;font-weight:500;color:var(--text-2)}
+  .mbody .chip{background:var(--bg)}
+  .mbody .chip.click:hover{background:var(--stone)}
+  .palette{display:flex;gap:10px;flex-wrap:wrap}
+  .sw{width:104px;cursor:pointer;border-radius:var(--r-md);overflow:hidden;background:var(--bg)}
+  .sw i{display:block;height:58px}
+  .sw b{display:block;font-size:12px;font-weight:600;padding:7px 9px;line-height:1.35}
+  .sw b span{display:block;font-family:var(--mono);font-weight:400;color:var(--ink-2)}
+  .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px 28px}
+  .meta h4,.block h4{margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3)}
+  .meta p,.block p{margin:0;font-size:16px;line-height:1.5;font-weight:500;overflow-wrap:anywhere}
+  .block p{white-space:pre-wrap}
+  .recipe{background:var(--yellow);border-radius:var(--r-lg);padding:20px 22px}
+  .recipe h4{color:var(--ink-2)}
+  .recipe p{font-family:var(--mono);font-size:14px;line-height:1.7;font-weight:400}
+  .recipe mark{background:var(--white);padding:1px 4px;border-radius:4px}
+  .designmd{background:var(--bg);border-radius:var(--r-lg);padding:18px 20px}
+  .designmd pre{font-family:var(--mono);font-size:12.5px;line-height:1.6;white-space:pre-wrap;max-height:420px;overflow:auto;margin:10px 0 0}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:20px}
+  .actions .spacer{flex:1}
+  .pending-box{background:var(--yellow);border-radius:var(--r-lg);padding:18px 20px;font-weight:500;font-size:16px;line-height:1.5}
+  .pending-box .btn{margin-top:12px}
+  /* Awaiting labels page: one click copies the instruction and opens Claude */
+  .labelbar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--yellow);border-radius:var(--r-lg);padding:18px 20px;margin:16px 0 0}
+  .labelbar .txt{flex:1;min-width:260px;font-size:16px;line-height:1.5;font-weight:500}
+  .labelbar .txt b{font-weight:700}
+  .labelbar .steps{display:block;font-size:14px;color:var(--ink-2);margin-top:2px}
+
+  /* forms */
+  .form{display:grid;gap:14px}
+  .form label{display:grid;gap:6px;font-size:13px;font-weight:700;color:var(--ink-2)}
+  .form label small{font-weight:500;color:var(--ink-3)}
+  .whatis{background:var(--white);border-radius:var(--r-md);padding:12px 14px;font-size:14px;line-height:1.5;font-weight:500;color:var(--ink-2);margin:0 0 10px}
+  .modal .whatis,.form .whatis{background:var(--bg)}
+  .whatis b{color:var(--ink)}
+  .form input,.form textarea,.form select{border:0;background:var(--bg);border-radius:var(--r-md);padding:12px 14px;font-size:15px;font-weight:500;outline:none;width:100%}
+  .form input:focus,.form textarea:focus,.form select:focus{box-shadow:0 0 0 2px var(--ink)}
+  .form select,.subpick .subbtn.more{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23171717' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 18px center;background-size:14px;padding-right:46px;cursor:pointer}
+  .form .flabel{display:grid;gap:6px;font-size:13px;font-weight:700;color:var(--ink-2)}
+  .form .flabel small{font-weight:500;color:var(--ink-3)}
+  .subpick{position:relative}
+  .subpick .subbtn{width:100%;text-align:left;border:0;background-color:var(--bg);border-radius:var(--r-md);padding:12px 14px;font:inherit;font-size:15px;font-weight:500;color:var(--ink);cursor:pointer;min-height:45px}
+  .subpick .subbtn:focus-visible,.subpick.open .subbtn{outline:none;box-shadow:0 0 0 2px var(--ink)}
+  .subpick .subbtn .none{color:var(--ink-3)}
+  .subpick .subbtn.more{padding-right:46px}
+  .subpanel{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:5;background:var(--white);border-radius:var(--r-md);box-shadow:0 12px 32px rgba(0,0,0,.16),0 0 0 1px var(--line);padding:6px;max-height:300px;overflow:auto}
+  .subpanel .opt{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;font-size:15px;font-weight:500;color:var(--ink);cursor:pointer}
+  .subpanel .opt:hover{background:var(--bg)}
+  .subpanel .opt input{width:18px;height:18px;margin:0;accent-color:var(--ink);flex:none;padding:0}
+  .subpanel .opt .muted{color:var(--ink-3)}
+  .subpanel .opt.newopt{border-top:1px solid var(--line);border-radius:0 0 10px 10px;margin-top:4px;padding-top:11px;font-weight:600}
+  .subpanel .subnew{margin:4px 0 4px;}
+  .form textarea{min-height:92px;resize:vertical;line-height:1.5}
+  .form textarea.mono{font-family:var(--mono);font-size:13px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .check{display:flex !important;grid-auto-flow:column;align-items:center;gap:8px !important;font-weight:600 !important}
+  .check input{width:auto}
+
+  .tabs{display:flex;gap:6px;background:var(--bg);padding:5px;border-radius:14px;width:max-content;max-width:100%}
+  .tabs button{border:0;background:none;height:38px;padding:0 16px;border-radius:10px;font-weight:600;font-size:14px}
+  .tabs button.active{background:var(--white);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+  .drop{border:2px dashed var(--dash);border-radius:var(--r-lg);padding:38px 20px;text-align:center;cursor:pointer;background:var(--bg);transition:all .12s}
+  .drop.over{border-color:var(--ink);background:var(--yellow)}
+  .drop strong{display:block;font-size:22px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px}
+  .drop p{margin:2px 0;color:var(--ink-2);font-weight:500}
+  .queue{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;max-height:260px;overflow:auto}
+  .queue div{border-radius:var(--r-sm);overflow:hidden;background:var(--bg);font-size:11px;font-weight:600;position:relative}
+  .queue img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+  .queue span{display:block;padding:4px 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .queue div.ok::after{content:"✓";position:absolute;top:6px;right:6px;background:var(--green);color:#fff;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px}
+  .queue div.err::after{content:"!";position:absolute;top:6px;right:6px;background:var(--coral);color:#fff;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px}
+  .progress{height:8px;background:var(--bg);border-radius:9px;overflow:hidden}
+  .progress i{display:block;height:100%;width:0;background:var(--ink);transition:width .2s}
+  .results{display:grid;gap:6px;font-size:14px;font-weight:500}
+  .results div{background:var(--bg);border-radius:var(--r-sm);padding:8px 12px}
+  .results .bad{background:var(--bad)}
+
+  /* help */
+  .help h2 .sub{display:block;color:var(--ink-3)}
+  .helpnav{display:flex;gap:6px;flex-wrap:wrap}
+  .helpnav a{text-decoration:none;font-weight:600;font-size:14px;background:var(--bg);padding:8px 12px;border-radius:999px}
+  .helpnav a:hover{background:var(--ink);color:var(--bg)}
+  .help section{background:var(--c);border-radius:var(--r-lg);padding:22px 24px;scroll-margin-top:16px}
+  .help h3{margin:0 0 10px;font-size:22px;font-weight:700;letter-spacing:-.01em}
+  .help p,.help li{font-size:16px;line-height:1.55;font-weight:500}
+  .help p{margin:8px 0}
+  .help ol,.help ul{margin:6px 0;padding-left:22px}
+  .help li{margin:5px 0}
+  .help code{background:var(--code);padding:1px 6px;border-radius:6px}
+  .help mark{background:var(--white);padding:1px 4px;border-radius:4px}
+  .help a{font-weight:600}
+  .help .ask{background:var(--white)}
+  .keys td{padding:6px 14px 6px 0;font-size:16px;font-weight:500}
+  kbd{font-family:var(--mono);font-size:13px;background:var(--white);border-radius:6px;padding:3px 8px;box-shadow:0 1px 0 rgba(0,0,0,.15)}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:var(--bg);font-weight:600;font-size:14px;padding:12px 18px;border-radius:var(--r-md);opacity:0;transition:all .2s;z-index:60;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .live{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink-2)}
+  .live i{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .live.off i{background:var(--coral)}
+
+  @media (max-width:860px){
+    .navbar{grid-template-columns:auto 1fr;height:auto;padding:14px 0}
+    .navbar .left{order:3;grid-column:1/-1}
+    .searchbox{width:100%}
+    .logo{font-size:22px}
+  }
+  @media (max-width:640px){
+    .container{padding:0 16px}
+    .grid{grid-template-columns:1fr}
+    .two{grid-template-columns:1fr}
+    .mbody{padding:22px 18px 24px}
+    .scrim{padding:10px}
+    .btn.hide-sm{display:none}
+  }
+  /* category pills, folders and label filters stay in view while scrolling */
+  #stickymark{height:1px;margin-bottom:-1px}
+  /* while the bar is pinned, keep the page tall enough to stay pinned even when a category only has a few cards */
+  .pinned #grid{min-height:100vh}
+  .stickybar{position:sticky;top:0;z-index:15;background:var(--bg);margin:0 -20px;padding:10px 20px 8px;transition:box-shadow .2s}
+  .stickybar.stuck{box-shadow:0 10px 18px -14px var(--shadow)}
+  .stickybar .subrow{margin-bottom:6px}
+  /* once it sticks, everything in the bar shrinks so it takes less room */
+  html{overflow-anchor:none} /* stops the page jumping when the bar shrinks */
+  .stickybar,.stickybar .pills,.stickybar .subrow,.stickybar .toolbar{transition:padding .2s, margin .2s, gap .2s, box-shadow .2s}
+  .stickybar .pill,.stickybar .toolbar .btn{transition:height .2s, padding .2s, font-size .2s, background .12s}
+  .stickybar.stuck{padding-top:6px;padding-bottom:4px}
+  .stickybar.stuck .pills{gap:5px;margin-bottom:5px}
+  .stickybar.stuck .pill{height:28px;padding:0 10px;font-size:12px;gap:5px}
+  .stickybar.stuck .pill .n{font-size:11px}
+  .stickybar.stuck .subrow{padding:5px 6px;gap:4px;margin:0 0 4px;border-radius:12px}
+  .stickybar.stuck .subrow .pill{height:24px;font-size:11.5px;padding:0 9px}
+  .stickybar.stuck .subrow .lbl{font-size:11.5px;margin:0 2px 0 4px}
+  .stickybar.stuck .toolbar{margin:0;gap:6px}
+  .stickybar.stuck #sort{display:none}
+  .stickybar.stuck .toolbar:has(#filters:empty){display:none}
+  .stickybar.stuck .toolbar .btn.sm{height:28px;font-size:12px;padding:0 10px;border-radius:8px}
+  .stickybar.stuck .filters{font-size:12px;gap:4px}
+  @media (max-width:640px){
+    .stickybar{margin:0 -16px;padding:8px 16px 6px}
+    .stickybar.stuck{padding-top:5px;padding-bottom:3px}
+    .stickybar .pills,.stickybar .subrow{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-bottom:8px}
+    .stickybar .pills::-webkit-scrollbar,.stickybar .subrow::-webkit-scrollbar{display:none}
+    .stickybar .pill,.stickybar .subrow .lbl{flex:none}
+  }
+  /* tick the checkbox on a card to select it; once anything is ticked, the bar appears at the bottom */
+  .selecting .card{cursor:default}
+  .selecting .card .tools{display:none}
+  .selecting .card:hover{transform:none}
+  .card .tick{position:absolute;top:22px;left:22px;z-index:2;width:26px;height:26px;padding:0;border:0;border-radius:8px;background:var(--white);box-shadow:inset 0 0 0 1px var(--ink),0 1px 3px rgba(0,0,0,.1);display:grid;place-items:center;cursor:pointer;color:var(--bg);transition:box-shadow .12s, background .12s}
+  .card .tick:hover{box-shadow:inset 0 0 0 1.5px var(--ink),0 1px 3px rgba(0,0,0,.1)}
+  .card .tick:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+  .card .tick svg{width:16px;height:16px;opacity:0}
+  .card.sel{box-shadow:0 0 0 3px var(--ink)}
+  .card.sel .tick{background:var(--ink);color:var(--bg);box-shadow:none}
+  .card.sel .tick svg{opacity:1}
+  .card.sel .media{opacity:.82}
+  .bulkbar{position:fixed;left:50%;bottom:20px;transform:translate(-50%,24px);z-index:25;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;background:var(--ink);color:var(--bg);padding:10px 10px 10px 20px;border-radius:18px;box-shadow:0 14px 34px rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;width:max-content;max-width:calc(100vw - 32px)}
+  .selecting .bulkbar{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+  .bulkbar .count{font-weight:700;font-size:15px;margin-right:6px;white-space:nowrap}
+  .bulkbar .btn{height:38px;font-size:14px;padding:0 14px;background:color-mix(in srgb, var(--bg) 14%, transparent);color:var(--bg)}
+  .bulkbar .btn.light{background:var(--bg);color:var(--ink)}
+  .bulkbar .btn.danger{background:var(--coral);color:#fff}
+  .bulkbar .btn:disabled{opacity:.4}
+  .bulkbar .sep{width:1px;height:24px;background:color-mix(in srgb, var(--bg) 25%, transparent);margin:0 2px}
+  .selecting .totop{bottom:96px}
+  .rmtags{display:flex;gap:6px;flex-wrap:wrap}
+  .rmtags .chip{cursor:pointer;background:var(--bg)}
+  .rmtags .chip.off{text-decoration:line-through;background:var(--coral);color:#fff}
+  .bulkhint{font-size:14px;font-weight:500;color:var(--ink-2);margin:-8px 0 0}
+  @media (max-width:640px){
+    .bulkbar{display:grid;grid-template-columns:repeat(3,1fr);width:calc(100% - 24px);bottom:12px;padding:8px;gap:6px}
+    .bulkbar .count{grid-column:1/-1;text-align:center;margin:4px 0 2px}
+    .bulkbar .sep{display:none}
+    .bulkbar .btn{padding:0 8px;font-size:13px}
+    .selecting .totop{bottom:150px}
+    .navbar .right{gap:6px}
+    .navbar .right .btn{height:40px;padding:0 12px;font-size:14px}
+    .navbar .right .btn.icon{width:40px;padding:0}
+    .live{font-size:0;gap:0}
+  }
+  .totop{position:fixed;right:24px;bottom:24px;z-index:20;width:52px;height:52px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.18);opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .2s, transform .2s}
+  .totop.show{opacity:1;transform:none;pointer-events:auto}
+  .totop:hover{transform:translateY(-2px)}
+  .totop:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+  @media (max-width:700px){.totop{right:16px;bottom:16px;width:46px;height:46px}}
+
+  /* dark mode: follows the Mac's setting until you choose with the moon/sun button */
+  :root[data-theme="dark"]{
+    --bg:#121212; --white:#1f1f1f; --ink:#f2f2f2; --ink-2:rgba(255,255,255,.64); --ink-3:rgba(255,255,255,.44);
+    --line:rgba(255,255,255,.1); --stone:#2e2d29;
+    --blue:#2a3756; --yellow:#4b3f1c; --peach:#463a2b; --pink:#4f2d31; --mint:#1e3b30; --lilac:#372f4e; --orange:#523a18; --sky:#22394a;
+    --hover:#2b2b2b; --on-ink-2:rgba(0,0,0,.55); --on-ink-line:rgba(0,0,0,.2); --chip:rgba(255,255,255,.09); --media:rgba(255,255,255,.06); --media-fit:#ebe9e4; --text-2:rgba(255,255,255,.82); --dash:rgba(255,255,255,.22); --bad:#4d2a24; --code:rgba(255,255,255,.1); --shadow:rgba(0,0,0,.9);
+    color-scheme:dark;
+  }
+  :root[data-theme="dark"] select.btn,:root[data-theme="dark"] select.btn.sm{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23f2f2f2' stroke-width='2' fill='none'/%3E%3C/svg%3E")}
+  :root[data-theme="dark"] .form select,:root[data-theme="dark"] .subpick .subbtn.more{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23f2f2f2' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
+  :root[data-theme="dark"] .scrim{background:rgba(0,0,0,.62)}
+  :root[data-theme="dark"] .themebtn .moon{display:none}
+  :root[data-theme="dark"] .themebtn .sun{display:block}
+  @media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121212; --white:#1f1f1f; --ink:#f2f2f2; --ink-2:rgba(255,255,255,.64); --ink-3:rgba(255,255,255,.44);
+    --line:rgba(255,255,255,.1); --stone:#2e2d29;
+    --blue:#2a3756; --yellow:#4b3f1c; --peach:#463a2b; --pink:#4f2d31; --mint:#1e3b30; --lilac:#372f4e; --orange:#523a18; --sky:#22394a;
+    --hover:#2b2b2b; --on-ink-2:rgba(0,0,0,.55); --on-ink-line:rgba(0,0,0,.2); --chip:rgba(255,255,255,.09); --media:rgba(255,255,255,.06); --media-fit:#ebe9e4; --text-2:rgba(255,255,255,.82); --dash:rgba(255,255,255,.22); --bad:#4d2a24; --code:rgba(255,255,255,.1); --shadow:rgba(0,0,0,.9);
+    color-scheme:dark;
+  }
+  :root:not([data-theme="light"]) select.btn,:root:not([data-theme="light"]) select.btn.sm{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23f2f2f2' stroke-width='2' fill='none'/%3E%3C/svg%3E")}
+  :root:not([data-theme="light"]) .form select,:root:not([data-theme="light"]) .subpick .subbtn.more{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23f2f2f2' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
+  :root:not([data-theme="light"]) .scrim{background:rgba(0,0,0,.62)}
+  :root:not([data-theme="light"]) .themebtn .moon{display:none}
+  :root:not([data-theme="light"]) .themebtn .sun{display:block}
+  }
+  .themebtn .sun{display:none}
+  .themebtn svg{width:18px;height:18px}
+</style>
+</head>
+<body>
+<div class="marquee" aria-hidden="true"><div class="track" id="marquee"></div></div>
+<div class="container">
+  <div class="navbar">
+    <div class="left">
+      <label class="searchbox">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Search tags, colours, styles…" autocomplete="off">
+      </label>
+    </div>
+    <a class="logo" href="#">dafina</a>
+    <div class="right">
+      <span class="live" id="live" title="Watching the sources folder for changes"><i></i>Live</span>
+      <button class="btn" id="helpBtn" title="Help (press ?)">Help</button>
+      <button class="btn icon" id="favBtn" title="Favourites only">★</button>
+      <button class="btn icon themebtn" id="themeBtn" title="Switch light / dark mode" aria-label="Switch light / dark mode"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg></button>
+      <button class="btn dark" id="addBtn">+ Add</button>
+    </div>
+  </div>
+
+  <p class="intro" id="intro">&nbsp;</p>
+
+  <div id="stickymark" aria-hidden="true"></div>
+  <div class="stickybar" id="stickybar">
+  <div class="pills" id="cats"></div>
+  <div id="subs"></div>
+  <div class="toolbar">
+    <div class="filters grow" id="filters"></div>
+    <select class="btn sm" id="sort" aria-label="Sort">
+      <option value="new">Newest first</option>
+      <option value="old">Oldest first</option>
+      <option value="az">A – Z</option>
+    </select>
+  </div>
+  </div>
+  <div id="labelbar"></div>
+  <main class="grid" id="grid"></main>
+</div>
+
+<div class="scrim" id="detail"><div class="modal" id="detailBox"></div></div>
+<div class="scrim" id="adder"><div class="modal" id="addBox"></div></div>
+<div class="scrim" id="bulk"><div class="modal" id="bulkBox" style="width:min(760px,100%)"></div></div>
+<div class="bulkbar" id="bulkbar" role="toolbar" aria-label="Selected references">
+  <span class="count" id="selCount">0 selected</span>
+  <button class="btn" data-selall>Select all</button>
+  <span class="sep"></span>
+  <button class="btn" data-bulkcopy title="Copy a reference line for each selected item, to paste to Claude">Copy references</button>
+  <button class="btn light" data-bulkedit>Edit…</button>
+  <button class="btn" data-bulkfav>★ Favourite</button>
+  <button class="btn danger" data-bulkdel>Delete</button>
+  <span class="sep"></span>
+  <button class="btn" data-selnone title="Untick everything (Esc)">Clear</button>
+</div>
+<div class="scrim" id="help"><div class="modal">
+  <div class="mtop"><button data-close title="Close (Esc)">✕</button></div>
+  <div class="mbody help">
+    <h2>Help<span class="sub">How your catalogue works</span></h2>
+    <nav class="helpnav">
+      <a href="#h-start">Starting</a><a href="#h-add">Adding</a><a href="#h-label">Labels</a><a href="#h-folders">Folders</a><a href="#h-refero">Refero</a><a href="#h-browse">Browsing</a><a href="#h-use">Using items</a><a href="#h-edit">Editing</a><a href="#h-keys">Shortcuts</a><a href="#h-trouble">Problems</a>
+    </nav>
+
+    <section id="h-start" style="--c:var(--blue)">
+      <h3>Starting the catalogue</h3>
+      <ol>
+        <li>Double-click <b>Start Catalogue.command</b> in your <b>Dafina</b> folder. It opens <code>http://localhost:4610</code> in your browser.</li>
+        <li>Keep that small Terminal window open while you use the catalogue. Closing it stops the catalogue.</li>
+        <li>The green <b>Live</b> dot (top right) means the catalogue is watching your folders. If it turns red, the catalogue has stopped. Double-click the start file again.</li>
+      </ol>
+    </section>
+
+    <section id="h-add" style="--c:var(--yellow)">
+      <h3>Adding inspiration</h3>
+      <p>Use whichever way is easiest:</p>
+      <ul>
+        <li><b>+ Add button.</b> Pick a category and an optional sub-folder, then drop in images. Choose <b>+ New category…</b> to start a new one, or type a new sub-folder name to create it. You can add a <b>source link</b> (applied to every image in that batch) and a <b>note for Claude</b>, such as what you like about it.</li>
+        <li><b>Bulk upload.</b> Drop as many images as you like, or whole folders. With <i>“keep their names as sub-folders”</i> ticked, a dropped folder becomes a sub-folder.</li>
+        <li><b>Paste.</b> Take a screenshot to the clipboard (⌘⇧⌃4), then press <b>⌘V</b> anywhere on the page.</li>
+        <li><b>Drag and drop</b> images straight onto the page.</li>
+        <li><b>Finder.</b> Put images straight into any folder inside <code>sources/</code>. They appear here within a few seconds.</li>
+        <li><b>Website links.</b> In <b>+ Add → Websites</b>, paste as many links as you like, one per line. Dafina opens each page in Chrome in the background, takes a fresh screenshot, and saves it with the link, the page title and its description. Tick <i>“longer section”</i> to capture about three screens instead of just the top. Refero style links work here too.</li>
+        <li><b>Chrome extension.</b> Click <b>Save to Dafina</b> in Chrome's toolbar to save the page you're looking at, with its link. You can pick the category, sub-folder and a note. Right-click any image on a page and choose <b>Save image to Dafina</b> to save just that image.</li>
+        <li><b>Figma plugin.</b> Select one or more frames in Figma, run <b>Save to Dafina</b> (Plugins → Development), pick a category and click <b>Save to Dafina</b>. Each frame is saved as a PNG (1×, 2× or 3×) with a note saying which file and page it came from, plus a link back to the frame when Figma provides one.</li>
+      </ul>
+      <p><b>Installing the Chrome extension (once):</b> in Chrome, go to <code>chrome://extensions</code>, turn on <b>Developer mode</b> (top right), click <b>Load unpacked</b> and choose the <code>chrome-extension</code> folder inside your Dafina folder. Then click the jigsaw icon in Chrome's toolbar and pin <b>Save to Dafina</b>. Dafina must be running for it to save.</p>
+      <p><b>Installing the Figma plugin (once):</b> open the <b>Figma desktop app</b> (the plugin can't reach Dafina from Figma in a web browser). Go to <b>Plugins → Development → Import plugin from manifest…</b> and choose <code>manifest.json</code> in the <code>figma-plugin</code> folder inside Dafina. It then appears under <b>Plugins → Development → Save to Dafina</b>.</p>
+      <p>New images show an <span class="badge wait">Awaiting labels</span> badge until Claude has described them.</p>
+    </section>
+
+    <section id="h-label" style="--c:var(--peach)">
+      <h3>Getting Claude to add labels</h3>
+      <ol>
+        <li>Open <b>Claude Code</b> (the Code tab in the Claude desktop app) with the <b>Dafina</b> folder selected.</li>
+        <li>Type: <span class="ask" style="margin:6px 0">label my dafina <button class="btn sm dark" data-copyask>Copy</button></span></li>
+        <li>Claude looks at every image that has no labels yet and adds a title, style line, labels, colour palette, typography, layout, mood, design brief and an <b>image recipe</b>. The page updates by itself.</li>
+      </ol>
+      <p><b>Shortcut:</b> on the <b>Awaiting labels</b> page (or inside any item still waiting), click <b>Label with Claude</b>. It copies <i>label my dafina</i> and opens the Claude app, so you only need to start a Code session in your Dafina folder and paste.</p>
+      <p><b>Useful variations:</b></p>
+      <ul>
+        <li>Just one area: <i>“catalogue the new cards”</i> or <i>“catalogue everything in clipart”</i></li>
+        <li>Changes: <i>“make the Sweet Winter recipe more vintage”</i></li>
+        <li>Redo: <i>“re-label the journals with more detail on the embellishments”</i></li>
+        <li>One exact item: click <b>Copy reference</b> (or the copy icon on its card) and paste it in with your request.</li>
+      </ul>
+      <p>The <b>Awaiting labels</b> pill shows how many images still need doing. Notes and links you add when uploading help Claude write better labels.</p>
+    </section>
+
+    <section id="h-folders" style="--c:var(--mint)">
+      <h3>Categories and sub-folders</h3>
+      <ul>
+        <li>Your folder <code>Dafina/sources/</code> runs the catalogue. Each folder inside it is a <b>category</b>, and each folder inside that is a <b>sub-category</b>, at any depth (for example <code>cards › lucy › birthday</code>).</li>
+        <li>Add, rename, move or delete folders and images in Finder whenever you like. The catalogue updates within a few seconds.</li>
+        <li><b>Rename in the app:</b> open a category (or one of its sub-folders) and click <b>✎ Rename</b> at the end of the folder row. It renames the real folder on your Mac, and every image keeps its labels, link and notes. To rename a category, open the category itself; to rename a sub-folder, open that sub-folder first.</li>
+        <li>Labels stay attached to the image itself, so <b>moving or renaming a file keeps its labels and link</b>.</li>
+        <li>A new top-level folder in <code>sources/</code> becomes a new category automatically.</li>
+        <li>Folder names can be lowercase. The site just shows them capitalised.</li>
+      </ul>
+    </section>
+
+    <section id="h-refero" style="--c:var(--lilac)">
+      <h3>Importing website styles from Refero</h3>
+      <p class="whatis"><b>What is Refero?</b> <a href="https://refero.design/" target="_blank" rel="noopener">Refero</a> is a website of design inspiration for UI and web designers. Its <b>Styles</b> library (<a href="https://styles.refero.design/" target="_blank" rel="noopener">styles.refero.design</a>) takes the look of well-known product websites and breaks each one down into its colours, fonts, spacing and components. Each style comes with a <b>DESIGN.md</b>: a plain-text style guide that AI tools such as Claude can follow. You don't need Refero to use this catalogue; it's just a quick way to collect website styles with exact details.</p>
+      <ol>
+        <li>Browse <a href="https://styles.refero.design/" target="_blank" rel="noopener">styles.refero.design</a> and open a style you like. Copy its link (it looks like <code>styles.refero.design/style/…</code>).</li>
+        <li>Click <b>+ Add → Import from Refero</b> and paste one or more links, one per line.</li>
+        <li>Each import saves the screenshot, the link, Refero's description and the full <b>DESIGN.md</b> (exact colours, fonts and spacing). These go into <code>web design › refero</code> unless you choose another folder.</li>
+        <li>Ask Claude to <i>label my dafina</i>. It uses the DESIGN.md for accurate colours and fonts.</li>
+      </ol>
+    </section>
+
+    <section id="h-browse" style="--c:var(--sky)">
+      <h3>Finding things</h3>
+      <ul>
+        <li><b>Category pills</b> filter by category. Once one is open, its <b>folders</b> appear underneath. Click one to go deeper, and use the breadcrumb to go back up.</li>
+        <li><b>Drag a category pill</b> left or right to put the categories in your own order. It's saved straight away. New categories join at the end. To go back to the original order, ask Claude to <i>“reset my category order”</i>.</li>
+        <li><b>Search</b> looks through titles, labels, colours (names and hex codes), notes, folders and file names.</li>
+        <li><b>Click any label</b> to see everything with that label. Click more labels to narrow down further.</li>
+        <li><b>★</b> shows favourites only. Use <b>Newest / Oldest / A–Z</b> to change the order.</li>
+        <li><b>Dark mode:</b> the <b>moon</b> button (top right) switches to dark mode, and the <b>sun</b> switches back. The catalogue remembers your choice. Until you pick one, it follows your Mac's appearance setting.</li>
+      </ul>
+    </section>
+
+    <section id="h-use" style="--c:var(--pink)">
+      <h3>Using an item</h3>
+      <p>Click a card to open it.</p>
+      <ul>
+        <li><b>Visit source ↗</b> opens where you found it (also the ↗ button on the card).</li>
+        <li><b>Copy brief</b> copies a full design description to paste into Claude or a design tool.</li>
+        <li><b>Copy image prompt</b> copies the recipe. Replace the highlighted <mark>[SUBJECT: …]</mark> with your own subject, then paste it into your image generator.</li>
+        <li><b>Copy reference</b> (or the <b>copy icon</b> on the card) copies a short line that points to exactly this item. Paste it to Claude with what you'd like done, for example <i>“make this recipe more watercolour: <span style="font-family:var(--mono);font-size:.9em">“Sleeping Fox” — Clipart › Christmas Woodland Animals PNGs › PNG-06.png · id …</span>”</i>.</li>
+        <li><b>Click a colour swatch</b> to copy its hex code.</li>
+        <li><b>DESIGN.md</b> (Refero items) shows or copies the full style guide.</li>
+        <li><b>Click the big image</b> to see it full length. Use <b>← →</b> to move between items.</li>
+      </ul>
+    </section>
+
+    <section id="h-edit" style="--c:var(--orange)">
+      <h3>Editing, moving and deleting</h3>
+      <ul>
+        <li><b>Edit</b> (or <b>Edit / add link</b> on new items) lets you add a <b>source link</b>, change any label, or rewrite the brief and recipe.</li>
+        <li>Changing <b>Category</b> or <b>Sub-folder</b> in Edit moves the actual file. Choose <b>+ New category…</b> or type a new sub-folder name to create one.</li>
+        <li><b>Delete</b> moves the image to the <code>trash</code> folder inside Dafina, so you can get it back from there.</li>
+        <li><b>Several at once:</b> tick the <b>checkbox</b> at the top left of a card. As soon as one is ticked, a bar appears at the bottom, and clicking anywhere on another card selects it too. <b>Shift-click</b> selects everything between two cards, and <b>Select all</b> picks everything currently shown. Use the bar to:
+          <ul>
+            <li><b>Copy references</b>: copies one reference line per selected item. Paste them to Claude with what you'd like done, for example <i>“write one image prompt that blends these styles”</i>.</li>
+            <li><b>Edit…</b>: move them all to another category or sub-folder, add labels, remove labels, set one source link or add a note.</li>
+            <li><b>★ Favourite</b> or unfavourite them.</li>
+            <li><b>Delete</b> them (they go to the <code>trash</code> folder).</li>
+          </ul>
+          Click <b>Clear</b> or press <kbd>Esc</kbd> to untick everything.</li>
+      </ul>
+    </section>
+
+    <section id="h-keys" style="--c:var(--stone)">
+      <h3>Keyboard shortcuts</h3>
+      <table class="keys">
+        <tr><td><kbd>/</kbd></td><td>Jump to search</td></tr>
+        <tr><td><kbd>⌘</kbd> <kbd>V</kbd></td><td>Paste a screenshot to add it</td></tr>
+        <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>Previous / next item when one is open</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td>Close the open panel, or untick everything</td></tr>
+        <tr><td><kbd>⌘</kbd> <kbd>A</kbd></td><td>Select everything shown (while selecting)</td></tr>
+        <tr><td><kbd>Shift</kbd> + click</td><td>Select a run of cards (while selecting)</td></tr>
+        <tr><td><kbd>?</kbd></td><td>Open this help</td></tr>
+      </table>
+    </section>
+
+    <section id="h-trouble" style="--c:var(--blue)">
+      <h3>If something isn't working</h3>
+      <ul>
+        <li><b>“The catalogue server isn't running”</b> or a red <b>Live</b> dot: double-click <b>Start Catalogue.command</b>.</li>
+        <li><b>The page looks out of date</b> after an update: double-click the start file again. It replaces an older running copy. Then reload the page.</li>
+        <li><b>macOS blocks the start file</b> the first time: right-click it, choose <b>Open</b>, then <b>Open</b> again.</li>
+        <li><b>A new image doesn't appear</b>: check it's inside <code>sources/</code> and is an image (PNG, JPG, WEBP, GIF, SVG, HEIC, TIFF). OneDrive files that are “online only” may take a moment to download.</li>
+        <li><b>Anything else</b>: ask Claude in the Dafina folder, e.g. <i>“the catalogue isn't showing my new folder”</i>.</li>
+      </ul>
+    </section>
+    <p style="margin:6px 0 0;text-align:center;font-size:14px;font-weight:500;color:var(--ink-3)">Dafina is designed and made by Sue Rutherford.</p>
+  </div>
+</div></div>
+<button class="totop" id="totop" type="button" aria-label="Back to top" title="Back to top"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+<div class="toast" id="toast"></div>
+
+<script>
+const PASTELS = ["--blue","--yellow","--peach","--pink","--mint","--lilac","--orange","--sky","--stone"];
+const RAW_EXT = /\.(heic|tiff?|bmp|avif)$/i;
+const S = { categories: [], items: [], v: null, cat: "all", sub: "", q: "", tags: [], favOnly: false, sort: "new", view: [], open: null, selecting: false, sel: new Set(), lastSel: -1 };
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const encPath = p => (p || "").split("/").map(encodeURIComponent).join("/");
+const thumb = p => `/thumb?p=${encodeURIComponent(p)}`;
+const fullImg = p => RAW_EXT.test(p) ? `/thumb?s=l&p=${encodeURIComponent(p)}` : "/" + encPath(p);
+const catColor = name => { const i = S.categories.findIndex(c => c.name === name); return `var(${PASTELS[(i < 0 ? 8 : i) % PASTELS.length]})`; };
+const stem = f => (f || "").replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ");
+const hexOf = p => typeof p === "string" ? p : p.hex;
+const isUrl = s => /^https?:\/\//i.test(s || "");
+const SMALL = new Set(["and", "of", "the", "a", "in", "on", "for", "to"]), UPPER = new Set(["ui", "ux", "uk", "us", "3d", "ai"]);
+/* display name only — folders on disk keep their own names */
+const nice = s => /[A-Z]/.test(s || "") ? (s || "") : (s || "").split(" ").map((w, i) => UPPER.has(w) ? w.toUpperCase() : (i && SMALL.has(w)) ? w : w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+const nicePath = p => (p || "").split(" / ").filter(Boolean).map(nice).join(" › ");
+const where = e => [nice(e.category), ...(e.sub ? e.sub.split(" / ").map(nice) : [])].join(" › ");
+
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), Math.max(1900, msg.length * 55)); }
+async function copy(text, label) {
+  try { await navigator.clipboard.writeText(text); }
+  catch { const ta = document.createElement("textarea"); ta.value = text; document.body.append(ta); ta.select(); document.execCommand("copy"); ta.remove(); }
+  toast(label + " copied");
+}
+async function api(path, body) {
+  const r = await fetch(path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {});
+  const j = await r.json(); if (!r.ok) throw new Error(j.error || r.status); return j;
+}
+
+/* ---------------- live sync ---------------- */
+async function load() {
+  const st = await api("/api/state");
+  S.categories = st.categories; S.items = st.items; S.v = st.v;
+  if (S.sel.size) { const have = new Set(S.items.map(i => i.hash)); S.sel.forEach(h => { if (!have.has(h)) S.sel.delete(h); }); }
+  if (S.cat !== "all" && S.cat !== "awaiting" && !S.categories.some(c => c.name === S.cat)) { S.cat = "all"; S.sub = ""; }
+  render();
+  if (S.open && $("#detail").classList.contains("open") && !$("#editForm")) {
+    const again = S.items.find(i => i.hash === S.open.hash);
+    again ? openDetail(again) : closeAll();
+  }
+}
+async function poll() {
+  try {
+    const { v } = await api("/api/version");
+    $("#live").classList.remove("off");
+    if (v !== S.v) await load();
+  } catch { $("#live").classList.add("off"); }
+  setTimeout(poll, 2500);
+}
+
+/* ---------------- routing ---------------- */
+function readHash() {
+  const [c, ...rest] = decodeURIComponent(location.hash.slice(1)).split("/");
+  S.cat = c || "all"; S.sub = rest.join("/");
+}
+function go(cat, sub = "") { location.hash = sub ? `${encodeURIComponent(cat)}/${encodeURIComponent(sub)}` : encodeURIComponent(cat); }
+/* after switching category/folder/label: if you'd scrolled down, keep the bar pinned and start the new results just below it;
+   if you're still near the top, stay where you are */
+function toResults() {
+  const y = $("#stickymark").getBoundingClientRect().top + scrollY + 1;
+  if (scrollY > y - 1) window.scrollTo({ top: y, behavior: "auto" });
+}
+window.addEventListener("hashchange", () => { readHash(); render(); toResults(); });
+
+/* ---------------- filtering ---------------- */
+function haystack(e) {
+  return [e.title, e.style, e.summary, e.typography, e.layout, e.brief, e.notes, e.category, e.sub, e.file, e.source,
+    ...(e.tags || []), ...(e.mood || []), ...(e.palette || []).map(p => typeof p === "string" ? p : `${p.hex} ${p.name || ""}`)]
+    .join(" ").toLowerCase();
+}
+function filtered() {
+  let list = S.items.slice();
+  if (S.cat === "awaiting") list = list.filter(e => !e.labelled);
+  else if (S.cat !== "all") {
+    list = list.filter(e => e.category === S.cat);
+    if (S.sub) list = list.filter(e => e.sub === S.sub || e.sub.startsWith(S.sub + " / "));
+  }
+  if (S.favOnly) list = list.filter(e => e.favourite);
+  if (S.tags.length) list = list.filter(e => S.tags.every(t => (e.tags || []).includes(t) || (e.mood || []).includes(t)));
+  if (S.q) { const w = S.q.toLowerCase().split(/\s+/).filter(Boolean); list = list.filter(e => { const h = haystack(e); return w.every(x => h.includes(x)); }); }
+  const title = e => e.title || stem(e.file);
+  const by = { new: (a, b) => (b.added || "").localeCompare(a.added || "") || b.mtime - a.mtime, old: (a, b) => (a.added || "").localeCompare(b.added || "") || a.mtime - b.mtime, az: (a, b) => title(a).localeCompare(title(b)) };
+  return list.sort(by[S.sort]);
+}
+
+/* ---------------- render ---------------- */
+function render() {
+  const total = S.items.length, waiting = S.items.filter(i => !i.labelled).length, ncat = S.categories.length;
+  $("#intro").classList.toggle("one", !!total);
+  $("#intro").innerHTML = total
+    ? `Your library of <b>${total}</b> <span class="blob dot"></span> references across <b>${ncat}</b> <span class="blob dot green"></span> categories.`
+    : `Your design library <span class="blob dot"></span> starts here. Drop in screenshots <span class="blob pill"></span> and Claude will label them <span class="blob flower"></span>.`;
+  const marq = ["New here? Click Help or press ?", "Drop screenshots anywhere to add them", "⌘V pastes a screenshot", "Import styles from Refero", "Folders in /sources are your categories", `${total} references`, "Ask Claude: “label my dafina”"];
+  $("#marquee").innerHTML = [...marq, ...marq].map(t => `<span>${esc(t)}</span>`).join("");
+
+  $("#cats").innerHTML =
+    `<button class="pill ${S.cat === "all" ? "active" : ""}" data-cat="all">All <span class="n">${total}</span></button>` +
+    S.categories.map(c => `<button class="pill ${S.cat === c.name ? "active" : ""}" data-cat="${esc(c.name)}" data-drag draggable="true" title="Drag to reorder">${esc(nice(c.name))} <span class="n">${c.count}</span></button>`).join("") +
+    `<button class="pill await ${S.cat === "awaiting" ? "active" : ""}" data-cat="awaiting">Awaiting labels <span class="n">${waiting}</span></button>`;
+
+  /* sub-folders: show one level at a time, with a breadcrumb back up */
+  const cat = S.categories.find(c => c.name === S.cat);
+  const renameBtn = cat && cat.name !== "Unsorted" ? `<button class="pill renamebtn" data-rename title="Rename ${S.sub ? "this sub-folder" : "this category"}">✎ Rename</button>` : "";
+  if (cat && !cat.subs.length) $("#subs").innerHTML = renameBtn ? `<div class="subrow"><button class="pill active" data-sub="">${esc(nice(cat.name))} <span class="n">${cat.count}</span></button>${renameBtn}</div>` : "";
+  else if (cat && cat.subs.length) {
+    const segs = S.sub ? S.sub.split(" / ") : [];
+    const children = cat.subs.filter(s => { const p = s.path.split(" / "); return p.length === segs.length + 1 && (!S.sub || s.path.startsWith(S.sub + " / ")); });
+    const here = segs.length ? (cat.subs.find(s => s.path === S.sub) || { count: 0 }).count : cat.count;
+    const crumbs = [`<button class="pill ${!segs.length ? "active" : ""}" data-sub="">${esc(nice(cat.name))} <span class="n">${cat.count}</span></button>`]
+      .concat(segs.map((sg, i) => { const p = segs.slice(0, i + 1).join(" / "), c = (cat.subs.find(s => s.path === p) || {}).count || 0; return `<span class="lbl">›</span><button class="pill ${i === segs.length - 1 ? "active" : ""}" data-sub="${esc(p)}">${esc(nice(sg))} <span class="n">${c}</span></button>`; }));
+    $("#subs").innerHTML = `<div class="subrow">${crumbs.join("")}
+      ${children.length ? `<span class="lbl" style="margin-left:6px">${segs.length ? "›" : "Folders:"}</span>` + children.map(s => `<button class="pill" data-sub="${esc(s.path)}">${esc(nice(s.path.split(" / ").pop()))} <span class="n">${s.count}</span></button>`).join("") : (segs.length ? `<span class="lbl" style="margin-left:6px">${here ? "" : "empty folder"}</span>` : "")}
+      ${renameBtn}
+    </div>`;
+  } else $("#subs").innerHTML = "";
+
+  $("#filters").innerHTML = S.tags.length ? `Filtering by ${S.tags.map(t => `<span class="chip tag" data-untag="${esc(t)}">${esc(t)}</span>`).join("")} <button class="btn sm ghost" data-cleartags>Clear</button>` : "";
+  $("#favBtn").classList.toggle("on", S.favOnly);
+
+  $("#labelbar").innerHTML = S.cat === "awaiting" && waiting
+    ? `<div class="labelbar"><div class="txt"><b>${waiting} image${waiting === 1 ? " is" : "s are"} waiting for Claude.</b><span class="steps">The button copies <b>label my dafina</b> and opens the Claude app. In the <b>Code</b> tab, start a session in your <b>Dafina</b> folder, paste (⌘V) and press Return.</span></div><button class="btn dark" data-labelnow>Label with Claude</button></div>` : "";
+  const list = S.view = filtered();
+  $("#grid").innerHTML = list.map((e, i) => card(e, i)).join("") || emptyState();
+  updateSel();
+}
+
+const COPY_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"/></svg>`;
+/* a reference you can paste to Claude: readable title + folder, plus the file and id so it's unambiguous */
+function refText(e) {
+  const title = e.title || stem(e.file);
+  return `“${title}” — ${where(e)} › ${e.file} · id ${e.hash}`;
+}
+/* page screenshots read best cropped to the top; everything else is shown whole */
+const SCREENSHOT_CATS = new Set(["web design", "emails", "ui kits"]);
+/* a screenshot taller than the card keeps its top-crop; a wide one is shown whole so its sides aren't cut off */
+function fitShot(img) {
+  const box = img.parentElement;
+  if (!box.classList.contains("shot") || !img.naturalWidth) return;
+  box.classList.toggle("fit", img.naturalHeight / img.naturalWidth < 3 / 4);
+}
+function card(e, i) {
+  const tags = e.tags || [], pal = (e.palette || []).map(hexOf).slice(0, 6);
+  const title = e.title || stem(e.file);
+  const sub = e.labelled ? (e.style || where(e)) : where(e);
+  return `<article class="card${S.sel.has(e.hash) ? " sel" : ""}" data-i="${i}" style="--c:${catColor(e.category)}">
+    <button class="tick" data-tick title="Select" aria-label="Select ${esc(title)}" aria-pressed="${S.sel.has(e.hash)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+    <div class="media${SCREENSHOT_CATS.has(String(e.category).toLowerCase()) ? " shot" : " fit"}"><img loading="lazy" src="${thumb(e.path)}" alt="${esc(title)}" onload="fitShot(this)"></div>
+    <div class="badges">${!e.labelled ? `<span class="badge wait">Awaiting labels</span>` : ""}${e.favourite ? `<span class="badge fav">★</span>` : ""}</div>
+    <div class="tools">
+      <button class="go" data-copyref="${i}" title="Copy reference — paste it to Claude to point at this item" aria-label="Copy reference">${COPY_ICON}</button>
+      ${isUrl(e.source) ? `<a class="go" href="${esc(e.source)}" target="_blank" rel="noopener" title="Visit source" data-stop>↗</a>` : ""}
+    </div>
+    <div class="info">
+      <h3>${esc(title)}<span class="sub">${esc(sub)}</span></h3>
+      ${tags.length ? `<div class="chips">${tags.slice(0, 3).map(t => `<span class="chip click" data-tag="${esc(t)}">${esc(t)}</span>`).join("")}${tags.length > 3 ? `<span class="chip more">+${tags.length - 3}</span>` : ""}</div>` : ""}
+      <div class="foot"><span>${esc(where(e))}</span>${pal.length ? `<span class="swatches">${pal.map(h => `<i style="background:${esc(h)}"></i>`).join("")}</span>` : ""}</div>
+    </div></article>`;
+}
+function emptyState() {
+  if (S.items.length && (S.q || S.tags.length || S.favOnly)) return `<div class="empty"><h2>Nothing matches</h2><p>Try clearing the search or tag filters.</p></div>`;
+  if (S.cat === "awaiting") return `<div class="empty"><h2>All caught up</h2><p>Everything has labels. New images you add will wait here until Claude describes them.</p></div>`;
+  const here = S.cat === "all" ? "" : ` ${nice(S.cat)}${S.sub ? " › " + nicePath(S.sub) : ""}`;
+  return `<div class="empty"><h2>No${esc(here)} inspiration yet</h2>
+    <p>Click <b>+ Add</b>, drop screenshots anywhere on this page, paste with ⌘V — or put images straight into <code>sources/${esc(S.cat === "all" ? "<Category>" : S.cat)}${S.sub ? "/" + esc(S.sub.replace(/ \/ /g, "/")) : ""}/</code> in Finder. They appear here automatically.</p>
+    <div class="ask">Then ask Claude: “label my dafina” <button class="btn sm dark" data-copyask>Copy</button></div></div>`;
+}
+
+/* ---------------- detail ---------------- */
+const markSubject = r => esc(r).replace(/\[SUBJECT:[^\]]*\]/g, m => `<mark>${m}</mark>`);
+function briefText(e) {
+  const pal = (e.palette || []).map(p => typeof p === "string" ? p : `${p.hex}${p.name ? " " + p.name : ""}`).join(", ");
+  return [
+    `${e.title} — ${e.style || e.category}`, e.summary, "", e.brief, "",
+    (e.tags || []).length && `Key traits: ${e.tags.join("; ")}`,
+    pal && `Palette: ${pal}`, e.typography && `Typography: ${e.typography}`, e.layout && `Layout: ${e.layout}`,
+    (e.mood || []).length && `Mood: ${e.mood.join(", ")}`, isUrl(e.source) && `Source: ${e.source}`,
+  ].filter(x => x !== false && x !== undefined && x !== null).join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+function openDetail(e) {
+  S.open = e;
+  const title = e.title || stem(e.file), tags = e.tags || [], pal = e.palette || [];
+  const crumbs = esc(where(e));
+  $("#detailBox").innerHTML = `
+    <div class="mtop"><button data-nav="-1" title="Previous (←)">←</button><button data-nav="1" title="Next (→)">→</button><button data-close title="Close (Esc)">✕</button></div>
+    <div class="hero" id="hero" style="--c:${catColor(e.category)}"><img id="heroImg" src="${fullImg(e.path)}" alt="${esc(title)}"></div>
+    <div class="mbody">
+      <div class="crumbs">${crumbs} · <span style="color:var(--ink-3)">${esc(e.file)}</span></div>
+      <h2>${esc(title)}${e.style ? `<span class="sub">${esc(e.style)}</span>` : ""}</h2>
+      ${!e.labelled ? `<div class="pending-box">This one hasn't been described yet. Ask Claude <b>“label my dafina”</b> and it will add the title, labels, palette, brief and an image recipe. You can add the source link now with <b>Edit</b>.<br><button class="btn dark sm" data-labelnow>Label with Claude</button></div>` : ""}
+      ${e.summary ? `<p class="summary">${esc(e.summary)}</p>` : ""}
+      ${tags.length ? `<div class="chips">${tags.map(t => `<span class="chip click" data-tag="${esc(t)}">${esc(t)}</span>`).join("")}</div>` : ""}
+      ${pal.length ? `<div class="palette">${pal.map(p => { const h = hexOf(p); return `<div class="sw" data-hex="${esc(h)}" title="Copy ${esc(h)}"><i style="background:${esc(h)}"></i><b>${esc(p.name || h)}<span>${esc(h)}</span></b></div>`; }).join("")}</div>` : ""}
+      <div class="meta">
+        ${e.typography ? `<div><h4>Typography</h4><p>${esc(e.typography)}</p></div>` : ""}
+        ${e.layout ? `<div><h4>Layout</h4><p>${esc(e.layout)}</p></div>` : ""}
+        ${(e.mood || []).length ? `<div><h4>Mood</h4><p>${esc(e.mood.join(", "))}</p></div>` : ""}
+        ${e.source ? `<div><h4>Source</h4><p>${isUrl(e.source) ? `<a href="${esc(e.source)}" target="_blank" rel="noopener">${esc(e.source.replace(/^https?:\/\/(www\.)?/, "").slice(0, 64))}</a>` : esc(e.source)}</p></div>` : ""}
+        ${e.notes ? `<div><h4>Notes</h4><p>${esc(e.notes)}</p></div>` : ""}
+        <div><h4>Added</h4><p>${esc(e.added || "")}</p></div>
+      </div>
+      ${e.brief ? `<div class="block"><h4>Design brief</h4><p>${esc(e.brief)}</p></div>` : ""}
+      ${e.recipe ? `<div class="recipe block"><h4>Image recipe — swap the [SUBJECT], send to your image model</h4><p>${markSubject(e.recipe)}</p></div>` : ""}
+      <div id="dmd"></div>
+      <div class="actions">
+        ${isUrl(e.source) ? `<a class="btn dark" href="${esc(e.source)}" target="_blank" rel="noopener">Visit source ↗</a>` : ""}
+        ${e.labelled ? `<button class="btn dark" data-copybrief>Copy brief</button>` : ""}
+        ${e.recipe ? `<button class="btn dark" data-copyrecipe>Copy image prompt</button>` : ""}
+        <button class="btn" data-copyref title="Copy a reference to paste to Claude">Copy reference</button>
+        ${e.hasDesignMd ? `<button class="btn" data-designmd>DESIGN.md</button>` : ""}
+        <button class="btn" data-fav>${e.favourite ? "★ Favourite" : "☆ Favourite"}</button>
+        <span class="spacer"></span>
+        <button class="btn" data-edit>${e.labelled ? "Edit" : "Edit / add link"}</button>
+        <button class="btn" data-del>Delete</button>
+      </div>
+    </div>`;
+  $("#detail").classList.add("open");
+}
+function step(d) { const n = S.view.length; if (!n) return; const i = S.view.findIndex(x => x.hash === S.open?.hash); openDetail(S.view[(i + d + n) % n]); $("#detail").scrollTop = 0; }
+function closeAll() { $("#detail").classList.remove("open"); $("#adder").classList.remove("open"); $("#bulk").classList.remove("open"); $("#help").classList.remove("open"); S.open = null; }
+function openHelp() { closeAll(); $("#help").classList.add("open"); $("#help").scrollTop = 0; }
+
+async function showDesignMd(e) {
+  const box = $("#dmd");
+  if (box.innerHTML) { box.innerHTML = ""; return; }
+  const { designMd } = await api(`/api/designmd?hash=${e.hash}`);
+  box.innerHTML = `<div class="designmd"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h4 style="margin:0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3)">DESIGN.md from Refero</h4><button class="btn sm dark" data-copydmd>Copy DESIGN.md</button></div><pre>${esc(designMd)}</pre></div>`;
+  box.dataset.text = designMd;
+}
+
+/* ---------------- edit ---------------- */
+const subsOf = cat => ((S.categories.find(c => c.name === cat) || {}).subs || []).map(s => s.path);
+const normSub = p => (p || "").split("/").map(x => x.trim()).filter(Boolean).join(" / ");
+/* sub-folder picker: a drop-down of radio buttons (None, each existing sub-folder, + New sub-folder…) */
+function subField(id, cat, value, label) {
+  return `<div class="flabel"><span>${label}</span><div class="subpick" id="${id}" data-cat="${esc(cat)}" data-init="${esc(normSub(value))}"></div></div>`;
+}
+function setSubs(id, cat, value) {
+  const box = $("#" + id), subs = subsOf(cat), v = normSub(value ?? "");
+  const known = !v || subs.some(x => x.toLowerCase() === v.toLowerCase());
+  const pick = !v ? "" : known ? subs.find(x => x.toLowerCase() === v.toLowerCase()) : "__new__";
+  const name = id + "R", ind = p => (p.split(" / ").length - 1) * 18;
+  box.dataset.cat = cat;
+  box.innerHTML = `<button type="button" class="subbtn${subs.length ? " more" : ""}" aria-haspopup="true" aria-expanded="false"></button>
+    <div class="subpanel" hidden>
+      <label class="opt"><input type="radio" name="${name}" value="" ${pick === "" ? "checked" : ""}><span class="muted">None</span></label>
+      ${subs.map(x => `<label class="opt" style="padding-left:${10 + ind(x)}px"><input type="radio" name="${name}" value="${esc(x)}" ${pick === x ? "checked" : ""}>${esc(nice(x.split(" / ").pop()))}</label>`).join("")}
+      <label class="opt newopt"><input type="radio" name="${name}" value="__new__" ${pick === "__new__" ? "checked" : ""}>+ New sub-folder…</label>
+      <input class="subnew" placeholder="Name, e.g. landing pages or landing pages / dark" value="${pick === "__new__" ? esc(v) : ""}" ${pick === "__new__" ? "" : "hidden"}>
+    </div>`;
+  const btn = box.querySelector(".subbtn"), panel = box.querySelector(".subpanel"), nw = box.querySelector(".subnew");
+  const show = () => {
+    const r = box.querySelector("input[type=radio]:checked"), val = r ? r.value : "";
+    btn.innerHTML = val === "__new__" ? (nw.value.trim() ? `${esc(nicePath(normSub(nw.value)))} <span class="none">· new</span>` : `<span class="none">New sub-folder…</span>`)
+      : val ? esc(nicePath(val)) : `<span class="none">None</span>`;
+  };
+  const open = on => { panel.hidden = !on; box.classList.toggle("open", on); btn.setAttribute("aria-expanded", on); };
+  btn.onclick = () => open(panel.hidden);
+  box.querySelectorAll("input[type=radio]").forEach(r => r.onchange = () => {
+    const isNew = r.value === "__new__";
+    nw.hidden = !isNew; show();
+    if (isNew) nw.focus(); else open(false);
+  });
+  nw.oninput = show;
+  nw.onkeydown = ev => { if (ev.key === "Enter") { ev.preventDefault(); open(false); btn.focus(); } };
+  show();
+}
+/* close any open sub-folder picker on an outside click or Escape */
+document.addEventListener("click", ev => document.querySelectorAll(".subpick.open").forEach(b => { if (!b.contains(ev.target)) { b.querySelector(".subpanel").hidden = true; b.classList.remove("open"); b.querySelector(".subbtn").setAttribute("aria-expanded", false); } }), true);
+document.addEventListener("keydown", ev => { if (ev.key !== "Escape") return; const b = document.querySelector(".subpick.open"); if (b) { ev.stopPropagation(); b.querySelector(".subpanel").hidden = true; b.classList.remove("open"); b.querySelector(".subbtn").focus(); } }, true);
+function initSubs(id) { const b = $("#" + id); setSubs(id, b.dataset.cat, b.dataset.init); }
+function subValue(id) {
+  const b = $("#" + id), r = b.querySelector("input[type=radio]:checked"), v = r ? r.value : "";
+  return v === "__new__" ? normSub(b.querySelector(".subnew").value) : v;
+}
+function catOptions(sel) {
+  return S.categories.filter(c => c.name !== "Unsorted").map(c => `<option value="${esc(c.name)}" ${c.name.toLowerCase() === (sel || "").toLowerCase() ? "selected" : ""}>${esc(nice(c.name))}</option>`).join("") +
+    `<option value="__new__">+ New category…</option>`;
+}
+/* category select + "new category" name box; id is the select's id */
+function catField(id, sel, name) {
+  return `<select id="${id}"${name ? ` name="${name}"` : ""}>${catOptions(sel)}</select><input id="${id}New" placeholder="New category name, e.g. illustrations" hidden>`;
+}
+function wireCat(id, listId) {
+  const sel = $("#" + id), box = $("#" + id + "New");
+  sel.onchange = () => {
+    const isNew = sel.value === "__new__";
+    box.hidden = !isNew; if (isNew) box.focus();
+    setSubs(listId, isNew ? "" : sel.value, "");
+  };
+  if (sel.value === "__new__") box.hidden = false;   // no categories yet
+}
+/* the chosen category, or the typed new one (folders are lowercase on disk); null if a new one is left blank */
+function catValue(id) {
+  const v = $("#" + id).value;
+  if (v !== "__new__") return v;
+  const n = $("#" + id + "New").value.trim().toLowerCase();
+  if (!n) { toast("Type a name for the new category"); $("#" + id + "New").focus(); return null; }
+  return n;
+}
+const webCat = () => (S.categories.find(c => c.name.toLowerCase() === "web design") || S.categories[0] || { name: "Web Design" }).name;
+function openEdit(e) {
+  const palStr = (e.palette || []).map(p => typeof p === "string" ? p : `${p.hex}${p.name ? " " + p.name : ""}`).join(", ");
+  $(".mbody", $("#detailBox")).innerHTML = `
+    <h2 style="font-size:32px">Edit</h2>
+    <div class="form" id="editForm">
+      <label>Source link <small>— where you found it, so you can go back</small><input name="source" type="url" placeholder="https://…" value="${esc(e.source)}"></label>
+      <div class="two">
+        <label>Category <small>— moves the file</small>${catField("editCat", e.category)}</label>
+        ${subField("editSubs", e.category, e.sub, "Sub-folder <small>— pick one, or add a new one</small>")}
+      </div>
+      <div class="two"><label>Title<input name="title" value="${esc(e.title)}"></label><label>Style line<input name="style" value="${esc(e.style)}"></label></div>
+      <label>Summary<input name="summary" value="${esc(e.summary)}"></label>
+      <label>Labels <small>— comma separated</small><textarea name="tags">${esc((e.tags || []).join(", "))}</textarea></label>
+      <div class="two"><label>Palette <small>— e.g. #F6F5F0 white ground, #1F6F8B teal</small><input name="palette" value="${esc(palStr)}"></label><label>Mood<input name="mood" value="${esc((e.mood || []).join(", "))}"></label></div>
+      <div class="two"><label>Typography<input name="typography" value="${esc(e.typography)}"></label><label>Layout<input name="layout" value="${esc(e.layout)}"></label></div>
+      <label>Design brief<textarea name="brief">${esc(e.brief)}</textarea></label>
+      <label>Image recipe<textarea class="mono" name="recipe" style="min-height:120px">${esc(e.recipe)}</textarea></label>
+      <label>Notes<textarea name="notes">${esc(e.notes)}</textarea></label>
+      <div class="actions"><button class="btn dark" data-save>Save</button><button class="btn" data-canceledit>Cancel</button></div>
+    </div>`;
+  initSubs("editSubs"); wireCat("editCat", "editSubs");
+}
+async function saveEdit(e) {
+  const f = $("#editForm"), v = n => f.querySelector(`[name=${n}]`).value.trim();
+  const list = n => v(n).split(",").map(s => s.trim()).filter(Boolean);
+  const palette = list("palette").map(s => { const m = s.match(/^(#[0-9a-fA-F]{3,8})\s*(.*)$/); return m ? (m[2] ? { hex: m[1], name: m[2] } : m[1]) : null; }).filter(Boolean);
+  const changes = { source: v("source"), title: v("title"), style: v("style"), summary: v("summary"), tags: list("tags"), palette, mood: list("mood"), typography: v("typography"), layout: v("layout"), brief: v("brief"), recipe: v("recipe"), notes: v("notes") };
+  for (const k of Object.keys(changes)) if (!e.labelled && (changes[k] === "" || (Array.isArray(changes[k]) && !changes[k].length))) delete changes[k];
+  const newCat = catValue("editCat"); if (newCat === null) return;
+  if (newCat !== e.category || subValue("editSubs") !== e.sub) { changes.category = newCat; changes.sub = subValue("editSubs"); }
+  try {
+    const r = await api("/api/entry", { hash: e.hash, path: e.path, changes });
+    toast("Saved"); S.open = { ...e, ...r.entry, path: r.path }; await load();
+    const fresh = S.items.find(i => i.hash === e.hash); fresh ? openDetail(fresh) : closeAll();
+  } catch (err) { toast("Couldn't save: " + err.message); }
+}
+
+/* rename the open category, or the open sub-folder (the deepest one showing) */
+function openRename() {
+  const isSub = !!S.sub, current = isSub ? S.sub.split(" / ").pop() : S.cat;
+  const where = isSub ? `${nice(S.cat)} › ` + S.sub.split(" / ").slice(0, -1).map(nice).map(x => x + " › ").join("") : "";
+  closeAll();
+  $("#bulkBox").innerHTML = `<div class="mtop"><button data-close title="Close (Esc)">✕</button></div>
+    <div class="mbody">
+      <h2 style="font-size:32px">Rename ${isSub ? "sub-folder" : "category"}</h2>
+      <p class="bulkhint">${esc(where)}<b>${esc(nice(current))}</b>. This renames the folder on your Mac too. Labels, links and notes stay with every image.</p>
+      <div class="form">
+        <label>New name<input id="renameTo" value="${esc(nice(current))}" autocomplete="off"></label>
+        <div class="actions"><button class="btn dark" data-dorename>Rename</button><button class="btn" data-close>Cancel</button></div>
+      </div>
+    </div>`;
+  $("#bulk").classList.add("open");
+  const box = $("#renameTo"); box.focus(); box.select();
+  box.onkeydown = ev => { if (ev.key === "Enter") { ev.preventDefault(); doRename($("[data-dorename]")); } };
+}
+async function doRename(btn) {
+  const name = $("#renameTo").value.trim();
+  if (!name) return toast("Type a new name");
+  btn.disabled = true;
+  try {
+    const r = await api("/api/renamefolder", { category: S.cat, sub: S.sub, name });
+    closeAll(); toast("Renamed to “" + nice(name.toLowerCase()) + "”");
+    await load(); go(r.category, r.sub);
+  } catch (err) {
+    btn.disabled = false;
+    toast(/not found|404|unknown endpoint/i.test(err.message) && !/folder wasn't/.test(err.message) ? "Restart Dafina (double-click Start Catalogue) to turn on renaming" : "Couldn't rename: " + err.message);
+  }
+}
+
+/* "Label with Claude": copy the instruction, then bring the Claude app forward */
+async function labelNow() {
+  try { await navigator.clipboard.writeText("label my dafina"); }
+  catch { const ta = document.createElement("textarea"); ta.value = "label my dafina"; document.body.append(ta); ta.select(); document.execCommand("copy"); ta.remove(); }
+  let opened = false;
+  try { opened = (await api("/api/openclaude", {})).ok; } catch {}
+  if (!opened) location.href = "claude://";   // older server, or not a Mac: ask the browser to open the app
+  toast("Copied “label my dafina”. In Claude's Code tab, open your Dafina folder and paste");
+}
+
+/* ---------------- select several: bulk edit, favourite and delete ---------------- */
+const selItems = () => S.items.filter(i => S.sel.has(i.hash));
+function clearSel() {
+  S.sel.clear(); S.lastSel = -1;
+  document.querySelectorAll("#grid .card.sel").forEach(c => { c.classList.remove("sel"); c.querySelector(".tick")?.setAttribute("aria-pressed", "false"); });
+  updateSel();
+}
+function updateSel() {
+  const n = S.sel.size, shown = S.view.filter(e => S.sel.has(e.hash)).length;
+  S.selecting = n > 0; document.body.classList.toggle("selecting", S.selecting);
+  $("#selCount").textContent = n ? `${n} selected${shown < n ? ` (${n - shown} not shown)` : ""}` : "Click cards to select";
+  document.querySelectorAll("[data-bulkedit],[data-bulkfav],[data-bulkdel],[data-selnone],[data-bulkcopy]").forEach(b => b.disabled = !n);
+  const all = selItems(); $("[data-bulkfav]").textContent = all.length && all.every(e => e.favourite) ? "★ Unfavourite" : "★ Favourite";
+  const vis = S.view.length && S.view.every(e => S.sel.has(e.hash)); $("[data-selall]").textContent = vis ? "Deselect all" : `Select all (${S.view.length})`;
+}
+function toggleSel(i, shift) {
+  const e = S.view[i]; if (!e) return;
+  if (shift && S.lastSel >= 0) {
+    const on = !S.sel.has(e.hash), [a, b] = [Math.min(S.lastSel, i), Math.max(S.lastSel, i)];
+    for (let k = a; k <= b; k++) on ? S.sel.add(S.view[k].hash) : S.sel.delete(S.view[k].hash);
+  } else S.sel.has(e.hash) ? S.sel.delete(e.hash) : S.sel.add(e.hash);
+  S.lastSel = i;
+  document.querySelectorAll("#grid .card").forEach(c => { const on = S.sel.has(S.view[+c.dataset.i]?.hash); c.classList.toggle("sel", on); c.querySelector(".tick")?.setAttribute("aria-pressed", on); });
+  updateSel();
+}
+/* run one request per selected item, showing progress on the given button */
+async function eachSel(items, label, btn, fn) {
+  let done = 0, failed = 0; const old = btn ? btn.textContent : "";
+  for (const e of items) {
+    if (btn) btn.textContent = `${label} ${done + failed + 1} of ${items.length}…`;
+    try { await fn(e); done++; } catch { failed++; }
+  }
+  if (btn) btn.textContent = old;
+  return { done, failed };
+}
+function openBulkEdit() {
+  const items = selItems(); if (!items.length) return;
+  const counts = {}; items.forEach(e => (e.tags || []).forEach(t => counts[t] = (counts[t] || 0) + 1));
+  const tags = Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 60);
+  closeAll();
+  $("#bulkBox").innerHTML = `<div class="mtop"><button data-close title="Close (Esc)">✕</button></div>
+    <div class="mbody">
+      <h2 style="font-size:32px">Edit ${items.length} reference${items.length > 1 ? "s" : ""}</h2>
+      <p class="bulkhint">Only what you fill in changes. Everything else stays as it is on each reference.</p>
+      <div class="form" id="bulkForm">
+        <div class="two">
+          <label>Move to category <small>— moves the files</small><select id="bulkCat"><option value="">Don't move</option>${catOptions("")}</select><input id="bulkCatNew" placeholder="New category name, e.g. illustrations" hidden></label>
+          <div id="bulkSubWrap" hidden>${subField("bulkSubs", "", "", "Sub-folder <small>— pick one, or add a new one</small>")}</div>
+        </div>
+        <label>Add labels <small>— comma separated, added to every selected reference</small><input name="addtags" placeholder="e.g. christmas, gold foil"></label>
+        ${tags.length ? `<div class="flabel"><span>Remove labels <small>— click any to remove it from every selected reference (number = how many have it)</small></span><div class="rmtags">${tags.map(([t, c]) => `<button type="button" class="chip" data-rmtag="${esc(t)}">${esc(t)} <span style="opacity:.6">${c}</span></button>`).join("")}</div></div>` : ""}
+        <label>Source link <small>— leave blank to keep each one's own link</small><input name="source" type="url" placeholder="https://…"></label>
+        <label>Add to notes <small>— appended to each reference's notes</small><input name="notes" placeholder="e.g. for the spring brochure"></label>
+        <div class="actions"><button class="btn dark" data-bulksave>Apply to ${items.length}</button><button class="btn" data-close>Cancel</button></div>
+      </div>
+    </div>`;
+  const sel = $("#bulkCat"), box = $("#bulkCatNew"), wrap = $("#bulkSubWrap");
+  sel.onchange = () => { const isNew = sel.value === "__new__"; box.hidden = !isNew; if (isNew) box.focus(); wrap.hidden = !sel.value; setSubs("bulkSubs", isNew ? "" : sel.value, ""); };
+  initSubs("bulkSubs");
+  $("#bulk").classList.add("open");
+}
+async function saveBulk(btn) {
+  const items = selItems(), f = $("#bulkForm"), v = n => f.querySelector(`[name=${n}]`).value.trim();
+  const add = v("addtags").split(",").map(t => t.trim()).filter(Boolean);
+  const rm = new Set([...f.querySelectorAll(".rmtags .chip.off")].map(b => b.dataset.rmtag));
+  const source = v("source"), note = v("notes");
+  let cat = $("#bulkCat").value;
+  if (cat === "__new__") { cat = catValue("bulkCat"); if (cat === null) return; }
+  const sub = cat ? subValue("bulkSubs") : null;
+  if (!add.length && !rm.size && !source && !note && !cat) return toast("Nothing to change yet");
+  btn.disabled = true;
+  const r = await eachSel(items, "Saving", btn, async e => {
+    const changes = {};
+    if (add.length || rm.size) {
+      const t = (e.tags || []).filter(x => !rm.has(x));
+      add.forEach(x => { if (!t.some(y => y.toLowerCase() === x.toLowerCase())) t.push(x); });
+      changes.tags = t;
+    }
+    if (source) changes.source = source;
+    if (note) changes.notes = e.notes ? `${e.notes}\n${note}` : note;
+    if (cat) { changes.category = cat; changes.sub = sub; }
+    await api("/api/entry", { hash: e.hash, path: e.path, changes });
+  });
+  btn.disabled = false; closeAll();
+  toast(r.failed ? `Updated ${r.done}, ${r.failed} couldn't be changed` : `Updated ${r.done} reference${r.done === 1 ? "" : "s"}`);
+  await load();
+}
+async function bulkFav(btn) {
+  const items = selItems(), on = !items.every(e => e.favourite);
+  btn.disabled = true;
+  const r = await eachSel(items, "★", btn, e => api("/api/entry", { hash: e.hash, path: e.path, changes: { favourite: on } }));
+  btn.disabled = false; toast(`${on ? "Favourited" : "Unfavourited"} ${r.done}`); await load();
+}
+async function bulkDelete(btn) {
+  const items = selItems(); if (!items.length) return;
+  if (!confirm(`Delete ${items.length} reference${items.length > 1 ? "s" : ""}? The images move to the trash folder inside Dafina, so you can get them back from there.`)) return;
+  btn.disabled = true;
+  const r = await eachSel(items, "Deleting", btn, e => api("/api/delete", { hash: e.hash, path: e.path }));
+  btn.disabled = false; S.sel.clear();
+  toast(r.failed ? `Moved ${r.done} to trash, ${r.failed} couldn't be deleted` : `Moved ${r.done} to trash`);
+  await load();
+}
+
+/* ---------------- add: upload + refero ---------------- */
+let queue = [];
+function openAdder(files, tab = "upload") {
+  const defCat = S.categories.some(c => c.name === S.cat) ? S.cat : (openAdder.cat || S.categories[0]?.name || "Web Design");
+  const defSub = S.categories.some(c => c.name === S.cat) ? S.sub : (openAdder.sub || "");
+  queue = [];
+  $("#addBox").innerHTML = `
+    <div class="mtop"><button data-close title="Close">✕</button></div>
+    <div class="mbody">
+      <h2 style="font-size:34px">Add inspiration</h2>
+      <div class="tabs"><button data-tab="upload" class="${tab === "upload" ? "active" : ""}">Upload screenshots</button><button data-tab="web" class="${tab === "web" ? "active" : ""}">Websites</button><button data-tab="refero" class="${tab === "refero" ? "active" : ""}">Import from Refero</button></div>
+      <div id="tabUpload" ${tab !== "upload" ? "hidden" : ""}>
+        <div class="form">
+          <div class="two">
+            <label>Category${catField("upCat", defCat)}</label>
+            ${subField("upSubs", defCat, defSub, "Sub-folder <small>— optional</small>")}
+          </div>
+          <div class="two">
+            <label>Source link <small>— applies to every image in this batch</small><input id="upSource" type="url" placeholder="https://…"></label>
+            <label>Note for Claude <small>— optional</small><input id="upNote" placeholder="e.g. love the halftone texture"></label>
+          </div>
+          <label class="check"><input type="checkbox" id="keepFolders" checked> When I drop folders, keep their names as sub-folders</label>
+          <div class="drop" id="drop"><strong>Drop images or whole folders</strong><p>or click to choose files · paste with ⌘V · as many as you like</p>
+            <input type="file" id="file" accept="image/*" multiple hidden><input type="file" id="dir" webkitdirectory multiple hidden></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" data-pickdir>Choose a folder…</button><span id="qcount" style="align-self:center;font-weight:600;color:var(--ink-2)"></span></div>
+          <div class="progress" id="prog" hidden><i></i></div>
+          <div class="queue" id="queue"></div>
+        </div>
+        <div class="actions" style="margin-top:18px"><button class="btn dark" id="doUpload" disabled>Upload</button><button class="btn" data-close>Cancel</button></div>
+      </div>
+      <div id="tabWeb" ${tab !== "web" ? "hidden" : ""}>
+        <div class="form">
+          <label>Website links <small>— one per line, as many as you like</small><textarea id="webUrls" class="mono" style="min-height:140px" placeholder="https://example.com&#10;https://another-site.com/page"></textarea></label>
+          <div class="two">
+            <label>Category${catField("webCat", webCat())}</label>
+            ${subField("webSubs", webCat(), "", "Sub-folder <small>— optional</small>")}
+          </div>
+          <label>Note for Claude <small>— optional, added to every page</small><input id="webNote" placeholder="e.g. love the navigation"></label>
+          <label class="check"><input type="checkbox" id="webTall"> Capture a longer section (about three screens) instead of just the top</label>
+          <p class="whatis" style="margin:0">Dafina opens each page in Chrome in the background, takes a fresh screenshot and saves it with the link, the page title and its description. Refero style links work here too. Pages behind a login, or with a cookie banner, show what a first-time visitor sees.</p>
+          <div class="progress" id="webProg" hidden><i></i></div>
+          <div class="results" id="webResults"></div>
+        </div>
+        <div class="actions" style="margin-top:18px"><button class="btn dark" id="doWeb">Import</button><button class="btn" data-close>Close</button></div>
+      </div>
+      <div id="tabRefero" ${tab !== "refero" ? "hidden" : ""}>
+        <div class="form">
+          <label>Refero style links <small>— one per line, from styles.refero.design/style/…</small><textarea id="refUrls" class="mono" style="min-height:140px" placeholder="https://styles.refero.design/style/a73148b9-449b-42cd-9f38-86ef694f500e"></textarea></label>
+          <div class="two">
+            <label>Category${catField("refCat", webCat())}</label>
+            ${subField("refSubs", webCat(), "refero", "Sub-folder")}
+          </div>
+          <p class="whatis" style="margin:0"><b>What is Refero?</b> A website of design inspiration. Its Styles library breaks real product websites down into their colours, fonts and spacing, with a <b>DESIGN.md</b> style guide that AI tools can follow. Find a style you like there, copy its link and paste it above.</p>
+          <p style="margin:0;color:var(--ink-2);font-weight:500">Saves each style's screenshot, its link, Refero's description and the full DESIGN.md (colours, type, spacing tokens) — Claude uses that to write accurate labels.</p>
+          <div class="results" id="refResults"></div>
+        </div>
+        <div class="actions" style="margin-top:18px"><button class="btn dark" id="doRefero">Import</button><a class="btn" href="https://styles.refero.design/" target="_blank" rel="noopener">Browse Refero ↗</a><button class="btn" data-close>Close</button></div>
+      </div>
+    </div>`;
+  $("#adder").classList.add("open");
+  const drop = $("#drop");
+  drop.onclick = () => $("#file").click();
+  $("#file").onchange = ev => addFiles([...ev.target.files].map(f => ({ file: f, rel: "" })));
+  $("#dir").onchange = ev => addFiles([...ev.target.files].map(f => ({ file: f, rel: f.webkitRelativePath.split("/").slice(0, -1).join(" / ") })));
+  drop.ondragover = ev => { ev.preventDefault(); drop.classList.add("over"); };
+  drop.ondragleave = () => drop.classList.remove("over");
+  drop.ondrop = async ev => { ev.preventDefault(); drop.classList.remove("over"); addFiles(await filesFromDrop(ev.dataTransfer)); };
+  initSubs("upSubs"); initSubs("refSubs"); initSubs("webSubs");
+  wireCat("webCat", "webSubs");
+  $("#doWeb").onclick = doWeb;
+  wireCat("upCat", "upSubs");
+  wireCat("refCat", "refSubs");
+  $("#doUpload").onclick = doUpload;
+  $("#doRefero").onclick = doRefero;
+  if (files && files.length) addFiles(files);
+}
+async function filesFromDrop(dt) {
+  const out = [], entries = [...dt.items].map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+  if (!entries.length) return [...dt.files].map(f => ({ file: f, rel: "" }));
+  const readAll = reader => new Promise(res => { const acc = []; const next = () => reader.readEntries(b => { if (!b.length) return res(acc); acc.push(...b); next(); }, () => res(acc)); next(); });
+  async function walk(entry, parents) {
+    if (entry.isFile) { const f = await new Promise(r => entry.file(r, () => r(null))); if (f) out.push({ file: f, rel: parents.join(" / ") }); }
+    else if (entry.isDirectory) for (const child of await readAll(entry.createReader())) await walk(child, [...parents, entry.name]);
+  }
+  for (const e of entries) await walk(e, []);
+  return out;
+}
+function addFiles(list) {
+  list = list.filter(x => x.file && (x.file.type.startsWith("image/") || /\.(png|jpe?g|webp|gif|svg|avif|heic|tiff?|bmp)$/i.test(x.file.name)));
+  for (const x of list) {
+    x.name = x.file.name && x.file.name !== "image.png" ? x.file.name : `screenshot-${Date.now()}-${queue.length}.png`;
+    x.url = URL.createObjectURL(x.file); queue.push(x);
+  }
+  $("#queue").innerHTML = queue.map((x, i) => `<div id="q${i}"><img src="${x.url}" alt=""><span>${esc(x.rel ? x.rel + " / " : "")}${esc(x.name)}</span></div>`).join("");
+  $("#qcount").textContent = queue.length ? `${queue.length} image${queue.length > 1 ? "s" : ""} ready` : "";
+  const b = $("#doUpload"); b.disabled = !queue.length; b.textContent = `Upload ${queue.length || ""}`.trim();
+}
+const toDataURL = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(f); });
+async function doUpload() {
+  const cat = catValue("upCat"); if (cat === null) return;
+  const baseSub = subValue("upSubs"), source = $("#upSource").value.trim(), notes = $("#upNote").value.trim(), keep = $("#keepFolders").checked;
+  openAdder.cat = cat; openAdder.sub = baseSub;
+  const b = $("#doUpload"); b.disabled = true; $("#prog").hidden = false;
+  let done = 0, failed = 0, idx = 0;
+  const bar = () => { $("#prog i").style.width = `${(done + failed) / queue.length * 100}%`; b.textContent = `Uploading ${done + failed} / ${queue.length}…`; };
+  async function worker() {
+    while (idx < queue.length) {
+      const i = idx++, x = queue[i];
+      const sub = [baseSub, keep ? x.rel : ""].filter(Boolean).join(" / ");
+      try { await api("/api/upload", { category: cat, sub, filename: x.name, data: await toDataURL(x.file), source, notes }); done++; $("#q" + i)?.classList.add("ok"); }
+      catch { failed++; $("#q" + i)?.classList.add("err"); }
+      bar();
+    }
+  }
+  bar(); await Promise.all([worker(), worker(), worker()]);
+  await load();
+  b.textContent = failed ? `${done} uploaded, ${failed} failed` : `${done} uploaded ✓`;
+  toast(`${done} added to ${nice(cat)}${baseSub ? " › " + nicePath(baseSub) : ""}`);
+  queue = []; $("#qcount").textContent = "";
+  $(".actions", $("#tabUpload")).innerHTML = `<div class="ask" style="margin:0">Next, ask Claude: “label my dafina” <button class="btn sm dark" data-copyask>Copy</button></div><span class="spacer" style="flex:1"></span><button class="btn" data-addmore>Add more</button><button class="btn dark" data-goawait>See them</button>`;
+}
+async function doWeb() {
+  const urls = [...new Set($("#webUrls").value.split(/\s+/).map(s => s.trim()).filter(u => u.includes(".")).map(u => /^https?:\/\//i.test(u) ? u : "https://" + u))];
+  if (!urls.length) return toast("Paste at least one website link");
+  const cat = catValue("webCat"); if (cat === null) return;
+  const sub = subValue("webSubs"), notes = $("#webNote").value.trim(), tall = $("#webTall").checked;
+  const b = $("#doWeb"), prog = $("#webProg"), out = $("#webResults"), failed = [];
+  b.disabled = true; prog.hidden = false; out.innerHTML = "";
+  for (let i = 0; i < urls.length; i++) {
+    b.textContent = `Capturing ${i + 1} of ${urls.length}…`; prog.firstElementChild.style.width = `${(i / urls.length) * 100}%`;
+    try {
+      const r = await api("/api/website", { url: urls[i], category: cat, sub, notes, tall });
+      out.insertAdjacentHTML("beforeend", `<div>✓ <b>${esc(r.title)}</b> → ${esc(r.path.replace(/^sources\//, ""))}${r.refero ? " · Refero style with DESIGN.md" : ""}</div>`);
+    } catch (err) {
+      failed.push(urls[i]);
+      out.insertAdjacentHTML("beforeend", `<div class="bad">✕ ${esc(urls[i])} — ${esc(/not found|404/i.test(err.message) ? "Restart Dafina (double-click Start Catalogue) to turn on website import" : err.message)}</div>`);
+    }
+  }
+  prog.firstElementChild.style.width = "100%";
+  $("#webUrls").value = failed.join("\n");
+  b.disabled = false; b.textContent = "Import"; await load();
+}
+async function doRefero() {
+  const urls = $("#refUrls").value.split(/\s+/).map(s => s.trim()).filter(Boolean);
+  if (!urls.length) return toast("Paste at least one Refero style link");
+  const refCat = catValue("refCat"); if (refCat === null) return;
+  const b = $("#doRefero"); b.disabled = true; b.textContent = `Importing ${urls.length}…`;
+  try {
+    const r = await api("/api/refero", { urls, category: refCat, sub: subValue("refSubs") });
+    $("#refResults").innerHTML = r.done.map(d => `<div>✓ <b>${esc(d.title)}</b> → ${esc(d.path.replace(/^sources\//, ""))}${d.designMd ? " · DESIGN.md saved" : ""}</div>`).join("") +
+      r.failed.map(f => `<div class="bad">✕ ${esc(f.url)} — ${esc(f.error)}</div>`).join("");
+    if (r.done.length) { $("#refUrls").value = r.failed.map(f => f.url).join("\n"); await load(); }
+  } catch (err) { $("#refResults").innerHTML = `<div class="bad">${esc(err.message)}</div>`; }
+  b.disabled = false; b.textContent = "Import";
+}
+
+/* ---------------- events ---------------- */
+document.addEventListener("click", async ev => {
+  if (ev.target.closest("[data-stop]")) return;
+  /* the checkbox on a card selects it; once anything is selected, a click anywhere on a card does too (shift-click selects a run) */
+  const cardEl = ev.target.closest("#grid .card");
+  if (cardEl && (ev.target.closest("[data-tick]") || S.sel.size)) { ev.preventDefault(); return toggleSel(+cardEl.dataset.i, ev.shiftKey); }
+  if (ev.target.closest("[data-labelnow]")) return labelNow();
+  if (ev.target.closest("[data-rename]")) return openRename();
+  if (ev.target.closest("[data-dorename]")) return doRename(ev.target.closest("[data-dorename]"));
+  const bk = ev.target.closest("[data-selall],[data-selnone],[data-bulkcopy],[data-bulkedit],[data-bulkfav],[data-bulkdel],[data-bulksave],[data-rmtag]");
+  if (bk) {
+    const b = bk.dataset;
+    if (b.selall !== undefined) { const all = S.view.length && S.view.every(e => S.sel.has(e.hash)); S.view.forEach(e => all ? S.sel.delete(e.hash) : S.sel.add(e.hash)); return render(); }
+    if (b.selnone !== undefined) return clearSel();
+    if (b.bulkcopy !== undefined) {
+      /* one reference line per selected item, in the order they're shown (anything selected but filtered out goes last) */
+      const order = [...S.view.filter(e => S.sel.has(e.hash)), ...selItems().filter(e => !S.view.includes(e))];
+      return copy(order.map(refText).join("\n"), order.length === 1 ? "Reference" : `${order.length} references`);
+    }
+    if (b.bulkedit !== undefined) return openBulkEdit();
+    if (b.bulkfav !== undefined) return bulkFav(bk);
+    if (b.bulkdel !== undefined) return bulkDelete(bk);
+    if (b.bulksave !== undefined) return saveBulk(bk);
+    if (b.rmtag !== undefined) return bk.classList.toggle("off");
+  }
+  const t = ev.target.closest("[data-cat],[data-sub],[data-tag],[data-untag],[data-cleartags],[data-i],[data-close],[data-nav],[data-copybrief],[data-copyrecipe],[data-copyref],[data-designmd],[data-copydmd],[data-fav],[data-edit],[data-del],[data-save],[data-canceledit],[data-hex],[data-copyask],[data-addmore],[data-goawait],[data-tab],[data-pickdir]");
+  if (!t) { if (ev.target.classList.contains("scrim")) closeAll(); if (ev.target.id === "heroImg") $("#hero").classList.toggle("full"); return; }
+  const d = t.dataset, e = S.open;
+  if (d.cat !== undefined) { S.tags = []; return go(d.cat); }
+  if (d.sub !== undefined) return go(S.cat, d.sub);
+  if (d.tag !== undefined) { if (!S.tags.includes(d.tag)) S.tags.push(d.tag); closeAll(); render(); return toResults(); }
+  if (d.untag !== undefined) { S.tags = S.tags.filter(x => x !== d.untag); return render(); }
+  if (d.cleartags !== undefined) { S.tags = []; return render(); }
+  if (d.i !== undefined) return openDetail(S.view[+d.i]);
+  if (d.close !== undefined) return closeAll();
+  if (d.nav) return step(+d.nav);
+  if (d.copybrief !== undefined) return copy(briefText(e), "Brief");
+  if (d.copyrecipe !== undefined) return copy(e.recipe, "Image prompt");
+  if (d.copyref !== undefined) return copy(refText(d.copyref ? S.view[+d.copyref] : e), "Reference");
+  if (d.designmd !== undefined) return showDesignMd(e);
+  if (d.copydmd !== undefined) return copy($("#dmd").dataset.text, "DESIGN.md");
+  if (d.hex) return copy(d.hex, d.hex);
+  if (d.fav !== undefined) { await api("/api/entry", { hash: e.hash, path: e.path, changes: { favourite: !e.favourite } }); return load(); }
+  if (d.edit !== undefined) return openEdit(e);
+  if (d.canceledit !== undefined) return openDetail(e);
+  if (d.save !== undefined) return saveEdit(e);
+  if (d.del !== undefined) { if (!confirm(`Delete “${e.title || e.file}”? The image moves to the trash folder.`)) return; await api("/api/delete", { hash: e.hash, path: e.path }); closeAll(); toast("Moved to trash"); return load(); }
+  if (d.copyask !== undefined) return copy("label my dafina", "Request");
+  if (d.addmore !== undefined) return openAdder();
+  if (d.goawait !== undefined) { closeAll(); return go("awaiting"); }
+  if (d.pickdir !== undefined) return $("#dir").click();
+  if (d.tab) { document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("active", b === t)); $("#tabUpload").hidden = d.tab !== "upload"; $("#tabWeb").hidden = d.tab !== "web"; $("#tabRefero").hidden = d.tab !== "refero"; }
+});
+$("#addBtn").onclick = () => openAdder();
+$("#helpBtn").onclick = openHelp;
+/* help contents links scroll inside the panel instead of changing the page address */
+document.querySelectorAll(".helpnav a").forEach(a => a.onclick = ev => { ev.preventDefault(); document.querySelector(a.getAttribute("href")).scrollIntoView({ behavior: "smooth", block: "start" }); });
+$("#favBtn").onclick = () => { S.favOnly = !S.favOnly; render(); };
+$("#q").oninput = ev => { S.q = ev.target.value.trim(); render(); };
+$("#sort").onchange = ev => { S.sort = ev.target.value; render(); };
+document.addEventListener("keydown", ev => {
+  if (ev.key === "Escape") { if (S.selecting && !document.querySelector(".scrim.open")) return clearSel(); return closeAll(); }
+  if (S.selecting && (ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === "a" && !ev.target.matches("input,textarea,select") && !document.querySelector(".scrim.open")) { ev.preventDefault(); S.view.forEach(e => S.sel.add(e.hash)); return render(); }
+  const typing = ev.target.matches("input,textarea,select");
+  if ($("#detail").classList.contains("open") && !typing) { if (ev.key === "ArrowRight") step(1); if (ev.key === "ArrowLeft") step(-1); }
+  if (ev.key === "/" && !typing) { ev.preventDefault(); $("#q").focus(); }
+  if (ev.key === "?" && !typing) { ev.preventDefault(); openHelp(); }
+});
+document.addEventListener("paste", ev => {
+  if (ev.target.matches("input,textarea")) return;
+  const files = [...(ev.clipboardData?.files || [])].filter(f => f.type.startsWith("image/")).map(f => ({ file: f, rel: "" }));
+  if (!files.length) return;
+  ev.preventDefault();
+  $("#adder").classList.contains("open") && $("#drop") ? addFiles(files) : openAdder(files);
+});
+/* drag the category pills into your own order; it's saved in catalogue.json so every browser sees it */
+let dragPill = null;
+$("#cats").addEventListener("dragstart", ev => {
+  const p = ev.target.closest(".pill[data-drag]"); if (!p) return;
+  dragPill = p; p.classList.add("dragging");
+  ev.dataTransfer.effectAllowed = "move"; ev.dataTransfer.setData("text/plain", p.dataset.cat);
+});
+$("#cats").addEventListener("dragover", ev => {
+  if (!dragPill) return;
+  ev.preventDefault(); ev.stopPropagation();
+  const over = ev.target.closest(".pill[data-drag]");
+  if (!over || over === dragPill) return;
+  const r = over.getBoundingClientRect();
+  over.parentNode.insertBefore(dragPill, ev.clientX > r.left + r.width / 2 ? over.nextSibling : over);
+});
+$("#cats").addEventListener("drop", ev => { if (dragPill) { ev.preventDefault(); ev.stopPropagation(); } });
+$("#cats").addEventListener("dragend", async () => {
+  if (!dragPill) return;
+  dragPill.classList.remove("dragging"); dragPill = null;
+  const order = [...$("#cats").querySelectorAll(".pill[data-drag]")].map(p => p.dataset.cat);
+  if (order.join("|") === S.categories.map(c => c.name).join("|")) return;
+  const byName = Object.fromEntries(S.categories.map(c => [c.name, c]));
+  S.categories = order.map(n => byName[n]).filter(Boolean);
+  try { await api("/api/order", { order }); toast("Category order saved"); }
+  catch (err) { toast("Couldn't save the order — double-click Start Catalogue to update, then try again"); load(); }
+});
+document.addEventListener("dragover", ev => { if (!$("#adder").classList.contains("open")) ev.preventDefault(); });
+document.addEventListener("drop", async ev => {
+  if ($("#adder").classList.contains("open")) return;
+  ev.preventDefault();
+  const files = await filesFromDrop(ev.dataTransfer);
+  if (files.length) openAdder(files);
+});
+
+readHash();
+/* direct links: ?open=<hash> opens an item, ?help opens Help, ?add / ?add=refero opens the Add dialog */
+function openFromQuery() {
+  const q = new URLSearchParams(location.search);
+  if (q.has("open")) { const it = S.items.find(i => i.hash === q.get("open")); if (it) { S.view = filtered(); openDetail(it); } }
+  else if (q.has("help")) openHelp();
+  else if (q.has("add")) openAdder(null, ["refero", "web"].includes(q.get("add")) ? q.get("add") : "upload");
+}
+load().then(() => { openFromQuery(); poll(); }).catch(() => {
+  $("#grid").innerHTML = `<div class="empty"><h2>The catalogue server isn't running</h2><p>Double-click <b>Start Catalogue.command</b> in your Dafina folder, then reload this page.</p></div>`;
+  setTimeout(poll, 2500);
+});
+
+/* light / dark mode switch */
+(function () {
+  const root = document.documentElement, sys = matchMedia("(prefers-color-scheme: dark)");
+  const isDark = () => root.dataset.theme ? root.dataset.theme === "dark" : sys.matches;
+  document.getElementById("themeBtn").addEventListener("click", () => {
+    const next = isDark() ? "light" : "dark";
+    root.dataset.theme = next;
+    try { localStorage.setItem("dafina-theme", next); } catch (e) {}
+  });
+})();
+
+/* back-to-top button */
+(function () {
+  const b = document.getElementById("totop");
+  const bar = document.querySelector(".navbar");   // search bar, logo and buttons
+  const sticky = document.getElementById("stickybar");
+  /* the bar is "stuck" once the marker just above it has scrolled off the top (also works if the page opens already scrolled) */
+  const pin = on => { sticky.classList.toggle("stuck", on); document.body.classList.toggle("pinned", on); };
+  new IntersectionObserver(([e]) => pin(!e.isIntersecting && e.boundingClientRect.top < 0))
+    .observe(document.getElementById("stickymark"));
+  const mark = document.getElementById("stickymark");
+  const upd = () => {
+    b.classList.toggle("show", bar.getBoundingClientRect().bottom < 0);
+    pin(mark.getBoundingClientRect().bottom <= 0);
+  };
+  addEventListener("scroll", upd, { passive: true }); upd();
+  b.addEventListener("click", () => scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }));
+})();
+</script>
+</body>
+</html>

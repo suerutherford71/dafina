@@ -1,0 +1,122 @@
+<style>
+  :root{--bg:var(--figma-color-bg,#fff);--panel:var(--figma-color-bg-secondary,#f2f2f2);--ink:var(--figma-color-text,#171717);--ink-2:var(--figma-color-text-secondary,rgba(0,0,0,.55));--line:var(--figma-color-border,rgba(0,0,0,.1))}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:12px/1.45 Inter,-apple-system,system-ui,sans-serif}
+  .wrap{padding:14px;display:grid;gap:11px}
+  .head{display:flex;align-items:center;gap:8px}
+  .mark{width:24px;height:24px}
+  .head b{font-size:17px;font-weight:800;letter-spacing:-.03em}
+  label{display:grid;gap:4px;font-weight:600;color:var(--ink-2)}
+  input,select,textarea{font:inherit;color:var(--ink);background:var(--panel);border:1px solid transparent;border-radius:8px;padding:7px 9px;outline:none;width:100%}
+  input:focus,select:focus,textarea:focus{border-color:var(--ink)}
+  textarea{resize:vertical;min-height:44px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .sel{background:var(--panel);border-radius:10px;padding:9px 11px;max-height:96px;overflow:auto}
+  .sel b{display:block;margin-bottom:3px}
+  .sel div{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .scales{display:flex;gap:6px}
+  .scales button{flex:1;background:var(--panel);color:var(--ink);font-weight:600;padding:6px 0;border-radius:8px}
+  .scales button.on{background:var(--ink);color:var(--bg)}
+  button{font:inherit;border:0;cursor:pointer}
+  .go{background:var(--ink);color:var(--bg);font-weight:700;font-size:13px;border-radius:10px;padding:10px}
+  .go:disabled{opacity:.4;cursor:default}
+  .msg{border-radius:8px;padding:8px 10px;font-weight:600}
+  .ok{background:#c4e6d4;color:#14432f}
+  .bad{background:#fde2dc;color:#7a2414}
+  .info{background:#fde3a0;color:#4a3a10}
+</style>
+<div class="wrap">
+  <div class="head">
+    <svg class="mark" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#171717"/><circle cx="31.5" cy="38.5" r="14.5" fill="none" stroke="#f2f2f2" stroke-width="6.5"/><rect x="42.5" y="6" width="7.5" height="50" rx="3.75" fill="#f2f2f2"/><circle cx="31.5" cy="38.5" r="7" fill="#7fb7d9"/></svg>
+    <b>Save to Dafina</b>
+  </div>
+  <div id="offline" class="msg info" hidden>Dafina isn't running. Double-click <b>Start Catalogue.command</b> in your Dafina folder, then close and reopen this plugin.</div>
+  <div id="form" style="display:grid;gap:11px">
+    <div class="sel" id="sel"><b>Nothing selected</b><div>Select one or more frames on the canvas.</div></div>
+    <div class="two">
+      <label>Category<select id="cat"></select></label>
+      <label>Sub-folder<input id="sub" list="subs" placeholder="optional"><datalist id="subs"></datalist></label>
+    </div>
+    <label>Note for Claude<textarea id="note" placeholder="optional, e.g. our new onboarding screens"></textarea></label>
+    <label>Export size<div class="scales"><button data-s="1">1×</button><button data-s="2" class="on">2×</button><button data-s="3">3×</button></div></label>
+    <button class="go" id="go" disabled>Save to Dafina</button>
+    <div id="msg" class="msg" hidden></div>
+  </div>
+</div>
+<script>
+const APP = "http://localhost:4610";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const UPPER = ["ui", "ux", "uk", "us", "3d", "ai"];
+const nice = s => (s || "").split(" ").map(w => UPPER.includes(w.toLowerCase()) ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+const send = m => parent.postMessage({ pluginMessage: m }, "*");
+let cats = [], sel = [], saved = {}, scale = 2, queue = [], done = 0, failed = [];
+
+function say(html, kind) { const m = $("msg"); m.hidden = false; m.className = "msg " + kind; m.innerHTML = html; }
+function fillSubs() { const c = cats.find(x => x.name === $("cat").value); $("subs").innerHTML = (c ? c.subs : []).map(s => `<option value="${esc(s)}">`).join(""); }
+function b64(bytes) { let s = ""; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s); }
+
+async function loadCategories() {
+  try {
+    const r = await fetch(APP + "/api/categories");
+    if (!r.ok) throw new Error();
+    cats = (await r.json()).categories.filter(c => c.name !== "Unsorted");
+    $("cat").innerHTML = cats.map(c => `<option value="${esc(c.name)}">${esc(nice(c.name))}</option>`).join("");
+    const pick = cats.some(c => c.name === saved.cat) ? saved.cat : (cats.find(c => /ui kits|web design/i.test(c.name)) || cats[0] || {}).name;
+    $("cat").value = pick || "";
+    $("sub").value = saved.cat === pick ? (saved.sub || "") : "";
+    fillSubs();
+  } catch { $("offline").hidden = false; $("form").style.display = "none"; }
+}
+function showSelection(m) {
+  sel = m.items;
+  $("sel").innerHTML = sel.length
+    ? `<b>${sel.length} selected</b>` + sel.map(x => `<div>${esc(x.name)} · ${x.w}×${x.h}</div>`).join("")
+    : `<b>Nothing selected</b><div>Select one or more frames on the canvas.</div>`;
+  $("go").disabled = !sel.length;
+}
+
+document.querySelectorAll(".scales button").forEach(b => b.onclick = () => {
+  scale = +b.dataset.s; document.querySelectorAll(".scales button").forEach(x => x.classList.toggle("on", x === b));
+});
+$("cat").onchange = () => { $("sub").value = ""; fillSubs(); };
+$("go").onclick = () => {
+  if (!sel.length) return;
+  done = 0; failed = []; queue = sel.map(x => x.id);
+  $("go").disabled = true; say(`Exporting ${sel.length}…`, "info");
+  send({ type: "remember", value: { cat: $("cat").value, sub: $("sub").value.trim() } });
+  send({ type: "export", ids: queue, scale });
+};
+
+let pending = Promise.resolve();
+onmessage = ev => {
+  const m = ev.data.pluginMessage; if (!m) return;
+  if (m.type === "saved") { saved = m.saved || {}; loadCategories(); }
+  if (m.type === "selection") showSelection(m);
+  if (m.type === "failed") failed.push(m.name);
+  if (m.type === "image") {
+    // upload one at a time, in order
+    pending = pending.then(async () => {
+      say(`Saving ${done + failed.length + 1} of ${queue.length}…`, "info");
+      const notes = [$("note").value.trim(), `From Figma: ${m.where}`].filter(Boolean).join("\n");
+      try {
+        const r = await fetch(APP + "/api/upload", { method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ category: $("cat").value, sub: $("sub").value.trim(), filename: (m.name || "frame").replace(/[\\/:*?"<>|]+/g, "-").slice(0, 80) + ".png",
+            data: "data:image/png;base64," + b64(m.bytes), source: m.link, notes }) });
+        if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || r.status);
+        done++;
+      } catch (err) { failed.push(m.name); }
+    });
+  }
+  if (m.type === "exported") {
+    pending = pending.then(() => {
+      $("go").disabled = !sel.length;
+      const where = [nice($("cat").value), $("sub").value.trim()].filter(Boolean).join(" › ");
+      if (done) say(`✓ Saved ${done} to <b>${esc(where)}</b>. Ask Claude to “label my dafina” when you're ready.` + (failed.length ? `<br>Couldn't save: ${esc(failed.join(", "))}` : ""), failed.length ? "info" : "ok");
+      else say(`Couldn't save ${esc(failed.join(", ") || "anything")}. Is Dafina running? If you've just updated it, double-click Start Catalogue.command once.`, "bad");
+      if (done) send({ type: "notify", text: `Saved ${done} to Dafina` });
+    });
+  }
+};
+send({ type: "ready" });
+</script>

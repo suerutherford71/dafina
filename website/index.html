@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dafina — your design inspiration, labelled by Claude</title>
+<meta name="description" content="Dafina turns the screenshots and downloads scattered across your Mac into one private, searchable design library, and Claude labels every image for you. Free for Mac.">
+<meta property="og:title" content="Dafina — your design inspiration, labelled by Claude">
+<meta property="og:description" content="One private, searchable design library on your Mac. Claude writes the labels. Free.">
+<meta property="og:image" content="images/app.png">
+<link rel="icon" href="images/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f2f2f2; --surface:#ffffff; --ink:#171717; --ink-2:rgba(0,0,0,.58); --ink-3:rgba(0,0,0,.42);
+    --line:rgba(0,0,0,.08); --on-ink:#f2f2f2; --on-ink-2:rgba(255,255,255,.62); --on-ink-line:rgba(255,255,255,.22);
+    --blue:#b4c8f6; --yellow:#fde3a0; --peach:#f4deb7; --pink:#f7c2c2; --mint:#c4e6d4; --lilac:#dcd2f4; --sky:#cfe3f0;
+    --dot:#7fb7d9; --green:#1cc691; --coral:#ff6b4a; --orange:#f9cb86;
+    --chip:rgba(255,255,255,.62); --pastel-ink:#171717;
+    --r-xl:28px; --r-lg:16px; --r-md:12px;
+    --sans:"Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#121212; --surface:#1d1d1d; --ink:#f0f0f0; --ink-2:rgba(255,255,255,.64); --ink-3:rgba(255,255,255,.45);
+      --line:rgba(255,255,255,.1); --on-ink:#121212; --on-ink-2:rgba(0,0,0,.6); --on-ink-line:rgba(0,0,0,.2);
+      --chip:rgba(255,255,255,.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#121212; --surface:#1d1d1d; --ink:#f0f0f0; --ink-2:rgba(255,255,255,.64); --ink-3:rgba(255,255,255,.45);
+    --line:rgba(255,255,255,.1); --on-ink:#121212; --on-ink-2:rgba(0,0,0,.6); --on-ink-line:rgba(0,0,0,.2);
+    --chip:rgba(255,255,255,.55);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.5}
+  img{max-width:100%;display:block}
+  a{color:inherit}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+  @media (max-width:600px){.wrap{padding:0 16px}}
+
+  /* marquee */
+  .marquee{background:var(--ink);color:var(--on-ink);font-size:13px;font-weight:600;height:34px;overflow:hidden;white-space:nowrap;display:flex;align-items:center}
+  .marquee .track{display:inline-flex;animation:scroll 40s linear infinite}
+  .marquee span{padding:0 18px;border-right:1px solid var(--on-ink-line)}
+  @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @media (prefers-reduced-motion:reduce){.marquee .track{animation:none}}
+
+  /* nav */
+  nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:26px;letter-spacing:-.03em;text-decoration:none}
+  .logo img{width:36px;height:36px;border-radius:9px}
+  .navlinks{display:flex;align-items:center;gap:6px}
+  .navlinks a.txt{text-decoration:none;font-weight:600;font-size:15px;padding:10px 12px;border-radius:10px;color:var(--ink-2)}
+  .navlinks a.txt:hover{color:var(--ink);background:var(--surface)}
+  @media (max-width:720px){.navlinks a.txt{display:none}}
+
+  .btn{display:inline-flex;align-items:center;gap:8px;justify-content:center;height:48px;padding:0 22px;border-radius:var(--r-md);border:0;font:inherit;font-weight:700;font-size:15px;background:var(--surface);color:var(--ink);text-decoration:none;white-space:nowrap;cursor:pointer;transition:transform .12s ease}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.dark{background:var(--ink);color:var(--on-ink)}
+  .btn.sm{height:40px;padding:0 16px;font-size:14px;border-radius:10px}
+  .btn.ghost{background:transparent;box-shadow:inset 0 0 0 1.5px var(--ink)}
+
+  .blob{display:inline-block;vertical-align:middle;margin:0 .08em}
+  .blob.dot{width:.6em;height:.6em;border-radius:50%;background:var(--dot)}
+  .blob.green{background:var(--green)}
+  .blob.sq{width:.55em;height:.55em;border-radius:.14em;background:var(--coral);transform:rotate(12deg)}
+  .blob.flower{width:.66em;height:.66em;background:var(--orange);border-radius:40% 60% 45% 55%/55% 45% 60% 40%}
+
+  /* hero */
+  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;padding:48px 0 72px}
+  .hero h1{font-size:clamp(40px,6vw,76px);line-height:1.02;letter-spacing:-.045em;font-weight:800;margin:0 0 22px;text-wrap:balance}
+  .nowrap{white-space:nowrap}
+  .hero p.lede{font-size:clamp(18px,1.7vw,21px);color:var(--ink-2);font-weight:500;margin:0 0 30px;max-width:540px}
+  .hero .ctas{display:flex;gap:10px;flex-wrap:wrap}
+  .hero .small{margin-top:18px;font-size:14px;color:var(--ink-3);font-weight:600}
+  .shot{background:var(--blue);border-radius:var(--r-xl);padding:22px 0 0 22px;overflow:hidden;transform:rotate(1.2deg)}
+  .shot img{border-radius:14px 0 0 0}
+  @media (max-width:900px){.hero{grid-template-columns:1fr;gap:36px;padding-top:24px}.shot{transform:none}}
+
+  section{padding:72px 0}
+  .eyebrow{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--surface);padding:7px 12px;border-radius:999px;margin-bottom:18px}
+  h2{font-size:clamp(32px,4.2vw,54px);line-height:1.05;letter-spacing:-.04em;font-weight:800;margin:0 0 18px;max-width:900px;text-wrap:balance}
+  .sub{font-size:19px;color:var(--ink-2);font-weight:500;max-width:680px;margin:0 0 40px}
+
+  /* problem */
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media (max-width:860px){.grid3{grid-template-columns:1fr}}
+  .pcard{background:var(--surface);border-radius:var(--r-lg);padding:26px}
+  .pcard .fake{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);background:var(--bg);border-radius:10px;padding:12px 14px;margin-bottom:18px;line-height:1.7;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .pcard h3{font-size:21px;letter-spacing:-.02em;margin:0 0 8px}
+  .pcard p{margin:0;color:var(--ink-2);font-weight:500}
+  .bigquote{margin:42px 0 0;font-size:clamp(24px,3vw,36px);font-weight:600;letter-spacing:-.025em;line-height:1.2;max-width:900px}
+  .bigquote b{font-weight:800}
+
+  /* steps */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media (max-width:860px){.steps{grid-template-columns:1fr}}
+  .step{border-radius:var(--r-lg);padding:28px;color:var(--pastel-ink);min-height:260px;display:flex;flex-direction:column}
+  .step .n{width:40px;height:40px;border-radius:50%;background:var(--chip);display:grid;place-items:center;font-weight:800;margin-bottom:auto}
+  .step h3{font-size:26px;letter-spacing:-.03em;margin:40px 0 8px;line-height:1.1}
+  .step p{margin:0;font-weight:500;color:rgba(0,0,0,.66)}
+  .step code{font-family:var(--mono);font-size:.9em;background:var(--chip);padding:2px 7px;border-radius:6px}
+
+  /* label demo */
+  .demo{display:grid;grid-template-columns:.9fr 1.1fr;gap:14px;align-items:stretch}
+  @media (max-width:900px){.demo{grid-template-columns:1fr}}
+  .demo .pic{background:var(--blue);border-radius:var(--r-lg);padding:18px;display:flex}
+  .demo .pic img{border-radius:12px;object-fit:cover;object-position:left top;width:100%;height:100%;min-height:300px}
+  .labels{background:var(--surface);border-radius:var(--r-lg);padding:28px}
+  .labels h3{font-size:30px;letter-spacing:-.03em;margin:0}
+  .labels .style{color:var(--ink-2);font-weight:600;font-size:18px;margin:2px 0 18px}
+  .field{border-top:1px solid var(--line);padding:14px 0}
+  .field .k{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+  .tags{display:flex;flex-wrap:wrap;gap:6px}
+  .tag{background:var(--bg);border-radius:999px;padding:6px 12px;font-size:13.5px;font-weight:600}
+  .pal{display:flex;flex-wrap:wrap;gap:12px}
+  .sw{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+  .sw i{width:26px;height:26px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--line)}
+  .sw span{font-family:var(--mono);color:var(--ink-3);font-weight:400}
+  .field p{margin:0;font-weight:500}
+  .recipe{font-family:var(--mono);font-size:13.5px;background:var(--bg);padding:14px;border-radius:10px;line-height:1.6}
+
+  /* features */
+  .feats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media (max-width:980px){.feats{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.feats{grid-template-columns:1fr}}
+  .feat{background:var(--surface);border-radius:var(--r-lg);padding:22px}
+  .feat .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;margin-bottom:16px;color:var(--pastel-ink)}
+  .feat .ic svg{width:22px;height:22px}
+  .feat h3{font-size:17px;margin:0 0 6px;letter-spacing:-.01em}
+  .feat p{margin:0;color:var(--ink-2);font-size:15px;font-weight:500}
+
+  /* install */
+  .install{background:var(--ink);color:var(--on-ink);border-radius:var(--r-xl);padding:clamp(28px,5vw,56px)}
+  .install h2{color:var(--on-ink)}
+  .install .sub{color:var(--on-ink-2)}
+  .istep{display:grid;grid-template-columns:44px 1fr;gap:16px;padding:20px 0;border-top:1px solid var(--on-ink-line)}
+  .istep > div{min-width:0}
+  .istep .n{width:44px;height:44px;border-radius:50%;background:var(--green);color:#0b2b20;display:grid;place-items:center;font-weight:800}
+  .istep h3{margin:8px 0 6px;font-size:20px;letter-spacing:-.02em}
+  .istep p{margin:0;color:var(--on-ink-2);font-weight:500}
+  .istep kbd{font-family:var(--sans);font-weight:700;background:var(--on-ink-line);padding:2px 8px;border-radius:6px;color:var(--on-ink)}
+  .cmd{display:flex;align-items:stretch;gap:8px;margin-top:12px;max-width:100%}
+  .cmd code{flex:1;min-width:0;font-family:var(--mono);font-size:14px;background:rgba(127,127,127,.18);color:var(--on-ink);padding:14px 16px;border-radius:12px;overflow-x:auto;white-space:nowrap}
+  .cmd .btn{background:var(--on-ink);color:var(--ink);height:auto}
+  .install .note{margin-top:22px;padding:18px 20px;border-radius:var(--r-lg);background:rgba(127,127,127,.14);color:var(--on-ink-2);font-size:15px;font-weight:500}
+  .install .note b{color:var(--on-ink)}
+  .install .note a{color:var(--on-ink)}
+  .extras{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+  @media (max-width:860px){.extras{grid-template-columns:1fr}}
+  .extra{background:var(--surface);border-radius:var(--r-lg);padding:24px}
+  .extra h3{margin:0 0 6px;font-size:19px;letter-spacing:-.02em}
+  .extra p{margin:0 0 14px;color:var(--ink-2);font-weight:500;font-size:15px}
+  .extra ul{margin:0;padding-left:18px;color:var(--ink-2);font-weight:500;font-size:15px}
+  .extra li{margin:4px 0}
+
+  /* faq */
+  .faq{max-width:860px}
+  details{background:var(--surface);border-radius:var(--r-lg);margin-bottom:10px;padding:0 24px}
+  summary{cursor:pointer;list-style:none;font-weight:700;font-size:18px;padding:20px 0;display:flex;justify-content:space-between;gap:16px;letter-spacing:-.01em}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";font-weight:500;font-size:24px;line-height:1}
+  details[open] summary::after{content:"–"}
+  details p{margin:0 0 20px;color:var(--ink-2);font-weight:500}
+
+  /* donate */
+  .donate{background:var(--yellow);color:var(--pastel-ink);border-radius:var(--r-xl);padding:clamp(28px,5vw,56px);display:flex;justify-content:space-between;align-items:center;gap:28px;flex-wrap:wrap}
+  .donate h2{color:var(--pastel-ink);margin:0 0 10px}
+  .donate p{margin:0;font-size:19px;font-weight:500;color:rgba(0,0,0,.66);max-width:560px}
+  .donate .btn{background:#171717;color:#f2f2f2;height:56px;padding:0 28px;font-size:17px}
+
+  footer{padding:40px 0 56px;color:var(--ink-3);font-size:14px;font-weight:500;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  footer p{margin:0;max-width:640px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;background:var(--ink);color:var(--on-ink);padding:12px 18px;border-radius:12px;font-weight:600;font-size:14px;transition:.2s;pointer-events:none}
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+
+<div class="marquee" aria-hidden="true"><div class="track">
+  <span>Free for Mac</span><span>Your images never leave your computer</span><span>Claude writes the labels</span><span>Search by style, colour or hex code</span><span>Save straight from Chrome and Figma</span><span>An image prompt for every reference</span>
+  <span>Free for Mac</span><span>Your images never leave your computer</span><span>Claude writes the labels</span><span>Search by style, colour or hex code</span><span>Save straight from Chrome and Figma</span><span>An image prompt for every reference</span>
+</div></div>
+
+<div class="wrap">
+  <nav>
+    <a class="logo" href="#"><img src="images/icon.png" alt="">dafina</a>
+    <div class="navlinks">
+      <a class="txt" href="#problem">Why Dafina</a>
+      <a class="txt" href="#how">How it works</a>
+      <a class="txt" href="#faq">Questions</a>
+      <a class="txt js-kofi" href="#donate">Donate</a>
+      <a class="btn dark sm" href="#install">Install free</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <h1>You saved it for a reason. <span class="nowrap">Now you can</span> find it <span class="blob dot green"></span></h1>
+      <p class="lede">Dafina gathers the screenshots, downloads and saved pages scattered across your Mac into one private library, and Claude labels every image for you. Search by style, colour or mood, and find the right reference in seconds.</p>
+      <div class="ctas">
+        <a class="btn dark" href="#install">Install free</a>
+        <a class="btn" href="#how">See how it works</a>
+      </div>
+      <div class="small">Free · For Mac · Labelling needs a paid Claude plan</div>
+    </div>
+    <div class="shot"><img src="images/app.png" alt="The Dafina library: pastel cards of design references, each with a title, style line, labels and colour palette, filtered by category." width="840" height="900"></div>
+  </header>
+</div>
+
+<section id="problem"><div class="wrap">
+  <span class="eyebrow">The problem</span>
+  <h2>Inspiration everywhere <span class="blob sq"></span> organised nowhere.</h2>
+  <p class="sub">Every designer saves things. Almost nobody can find them again when a brief lands.</p>
+  <div class="grid3">
+    <div class="pcard">
+      <div class="fake">Screenshot 2026-03-14 at 09.41.22.png<br>Screenshot 2026-03-14 at 09.41.37.png<br>Screenshot 2026-05-02 at 16.03.10.png</div>
+      <h3>Screenshots with no names</h3>
+      <p>Your desktop is full of them. You know the perfect serif headline is in there somewhere.</p>
+    </div>
+    <div class="pcard">
+      <div class="fake">Downloads › inspo › new › new inspo 2 › final</div>
+      <h3>Folders you never open</h3>
+      <p>You've saved hundreds of references. You can picture about four of them.</p>
+    </div>
+    <div class="pcard">
+      <div class="fake">#tags: ________________</div>
+      <h3>Tagging nobody does</h3>
+      <p>Labelling takes longer than saving, so it never happens, and the library stays unsearchable.</p>
+    </div>
+  </div>
+  <p class="bigquote">Saving inspiration was never the hard part. <b>Finding it again is.</b> Dafina does the labelling, so you can just save.</p>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <span class="eyebrow">How it works</span>
+  <h2>Save it. Claude labels it. Find it.</h2>
+  <p class="sub">No tagging, no boards to curate, no account to create. Three steps, and the boring part isn't yours.</p>
+  <div class="steps">
+    <div class="step" style="background:var(--blue)">
+      <div class="n">1</div>
+      <h3>Drop it in</h3>
+      <p>Paste a screenshot, drag in a whole folder, save a page from Chrome or a frame from Figma, or paste a list of links and Dafina screenshots each website for you.</p>
+    </div>
+    <div class="step" style="background:var(--mint)">
+      <div class="n">2</div>
+      <h3>Ask Claude to label it</h3>
+      <p>Open Claude and type <code>label my dafina</code>. Claude looks at every new image properly and writes its title, labels, colours, brief and image prompt.</p>
+    </div>
+    <div class="step" style="background:var(--peach)">
+      <div class="n">3</div>
+      <h3>Find it in seconds</h3>
+      <p>Search <code>serif headline</code>, <code>sage green</code> or <code>#1F6F8B</code>. Click any label to see everything like it. Copy a brief or palette in one click.</p>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <span class="eyebrow">What Claude writes</span>
+  <h2>Every image, described like a designer would.</h2>
+  <p class="sub">Not just "website, green". Real, searchable detail, plus a ready-made prompt to make something new in the same style.</p>
+  <div class="demo">
+    <div class="pic"><img src="images/moss-and-loam.png" alt="A botanical shop landing page: a potted plant in a soft arch beside a serif headline."></div>
+    <div class="labels">
+      <h3>Moss &amp; Loam</h3>
+      <div class="style">botanical editorial × soft arch illustration</div>
+      <div class="field"><div class="k">Labels</div>
+        <div class="tags"><span class="tag">arched illustration window</span><span class="tag">italic accent in serif headline</span><span class="tag">flat potted plant illustration</span><span class="tag">sage green ground</span><span class="tag">pill buttons</span><span class="tag">generous whitespace</span></div>
+      </div>
+      <div class="field"><div class="k">Palette</div>
+        <div class="pal">
+          <div class="sw"><i style="background:#E9EBDF"></i>sage mist <span>#E9EBDF</span></div>
+          <div class="sw"><i style="background:#2F4A3A"></i>forest <span>#2F4A3A</span></div>
+          <div class="sw"><i style="background:#C9653A"></i>terracotta <span>#C9653A</span></div>
+          <div class="sw"><i style="background:#E8B64C"></i>sun <span>#E8B64C</span></div>
+        </div>
+      </div>
+      <div class="field"><div class="k">Design brief</div>
+        <p>A calm, editorial shop hero. Pair a high-contrast serif headline that has one italic word with a single flat illustration framed in an arch. Keep the ground a soft sage and let whitespace do the work.</p>
+      </div>
+      <div class="field"><div class="k">Image recipe</div>
+        <div class="recipe">[SUBJECT: a ceramics studio] as a botanical editorial landing page, flat illustration inside a soft arch, serif headline with an italic accent, sage and terracotta palette, airy layout</div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <span class="eyebrow">Easy by design</span>
+  <h2>Works the way you already work.</h2>
+  <p class="sub">Your own folders are the categories. Move things around in Finder and Dafina keeps up, labels and all.</p>
+  <div class="feats">
+    <div class="feat"><div class="ic" style="background:var(--blue)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><h3>Your folders, your categories</h3><p>Rename, nest or move folders whenever you like. Labels follow the image.</p></div>
+    <div class="feat"><div class="ic" style="background:var(--mint)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div><h3>Search anything</h3><p>By word, style, colour name or exact hex code.</p></div>
+    <div class="feat"><div class="ic" style="background:var(--yellow)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></div><h3>One-click copy</h3><p>Grab a brief, palette or image prompt and get straight to work.</p></div>
+    <div class="feat"><div class="ic" style="background:var(--pink)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><h3>Private</h3><p>Runs on your Mac. Your images stay in your own folder, never on our servers.</p></div>
+    <div class="feat"><div class="ic" style="background:var(--lilac)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></div><h3>Save whole websites</h3><p>Paste links and Dafina screenshots each page, with its title and link.</p></div>
+    <div class="feat"><div class="ic" style="background:var(--sky)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></div><h3>Chrome &amp; Figma</h3><p>Save a page, an image or a Figma frame without leaving what you're doing.</p></div>
+    <div class="feat"><div class="ic" style="background:var(--peach)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div><h3>Bulk edit</h3><p>Tick several cards to move, relabel, favourite or delete them together.</p></div>
+    <div class="feat"><div class="ic" style="background:var(--orange)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></div><h3>Light &amp; dark</h3><p>Easy on the eyes, whenever you're browsing.</p></div>
+  </div>
+</div></section>
+
+<section id="install"><div class="wrap">
+  <div class="install">
+    <span class="eyebrow" style="background:var(--on-ink-line);color:var(--on-ink)">Install</span>
+    <h2>Up and running in about two minutes.</h2>
+    <p class="sub">One line installs Dafina and opens it. No account, no sign-up, nothing to pay.</p>
+
+    <div class="istep"><div class="n">1</div><div>
+      <h3>Open Terminal</h3>
+      <p>Press <kbd>⌘</kbd> <kbd>Space</kbd>, type <b>Terminal</b> and press <kbd>Return</kbd>.</p>
+    </div></div>
+    <div class="istep"><div class="n">2</div><div>
+      <h3>Paste this line and press Return</h3>
+      <div class="cmd"><code id="cmd">curl -fsSL https://raw.githubusercontent.com/suerutherford71/dafina/main/install.sh | bash</code><button class="btn sm" id="copy" type="button">Copy</button></div>
+      <p style="margin-top:10px">If your Mac asks to install "command line developer tools", click Install, wait for it to finish, then paste the line again.</p>
+    </div></div>
+    <div class="istep"><div class="n">3</div><div>
+      <h3>Dafina opens in your browser</h3>
+      <p>Your library lives in a <b>Dafina</b> folder in your home folder. Next time, just double-click <b>Start Catalogue</b> inside it.</p>
+    </div></div>
+    <div class="istep"><div class="n">4</div><div>
+      <h3>Add images, then ask Claude</h3>
+      <p>In the Claude desktop app, open the Code tab, choose your Dafina folder and type <b>label my dafina</b>.</p>
+    </div></div>
+
+    <div class="note"><b>Why Terminal and not a download?</b> macOS shows a security warning for apps downloaded from websites unless the maker pays Apple to approve them. Installing with one line avoids that warning, and you can <a class="js-script" href="https://github.com/suerutherford71/dafina/blob/main/install.sh">read exactly what it does</a> first. Running the same line again updates Dafina and never touches your library.</div>
+  </div>
+
+  <div class="extras">
+    <div class="extra">
+      <h3>Save to Dafina for Chrome</h3>
+      <p>Save the page you're on, or right-click any image to add it to your library.</p>
+      <a class="btn dark sm js-chrome" href="#faq-chrome">Add to Chrome</a>
+    </div>
+    <div class="extra">
+      <h3>Save to Dafina for Figma</h3>
+      <p>Send selected frames to your library. Figma desktop app: Plugins › Development › Import plugin from manifest, then pick <b>figma-plugin/manifest.json</b> in your Dafina folder.</p>
+    </div>
+    <div class="extra">
+      <h3>What you need</h3>
+      <ul>
+        <li>A Mac</li>
+        <li>Google Chrome</li>
+        <li>The Claude desktop app with a paid plan (Pro or above) for labelling</li>
+        <li>Optional: Figma desktop app</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<section id="faq"><div class="wrap">
+  <span class="eyebrow">Questions</span>
+  <h2>Good to know.</h2>
+  <div class="faq">
+    <details><summary>Is Dafina really free?</summary><p>Yes, completely. If it saves you time, you're welcome to buy me a coffee, but there's no catch and nothing to unlock.</p></details>
+    <details><summary>Are my images uploaded anywhere?</summary><p>Dafina itself never uploads your images. They stay in your own folder on your own Mac. When you ask Claude to label them, Claude looks at the new images through your own Claude account, just as it would any file you share with it. You can keep the folder in OneDrive, Dropbox or iCloud Drive for backup.</p></details>
+    <details><summary>Why do I need a paid Claude plan?</summary><p>The labelling is done by Claude, using the Code tab in the Claude desktop app, which comes with paid plans. Everything else (saving, browsing, searching, copying) works without it.</p></details>
+    <details id="faq-chrome"><summary>How do I add the Chrome extension?</summary><p>Click "Add to Chrome" above. If the Chrome Web Store link isn't live yet: go to chrome://extensions, turn on Developer mode (top right), click Load unpacked and choose the chrome-extension folder inside your Dafina folder. Then pin Save to Dafina from the jigsaw icon.</p></details>
+    <details><summary>Does it work on Windows?</summary><p>Not yet. Dafina is Mac only for now.</p></details>
+    <details><summary>How do I update or uninstall it?</summary><p>To update, paste the install line into Terminal again: your images and labels are kept. To uninstall, close the Terminal window that's running Dafina and drag the Dafina folder to the Bin (move your images out first if you want to keep them).</p></details>
+    <details><summary>Is Dafina made by Anthropic?</summary><p>No. Dafina is an independent project that works with Claude. It isn't made, endorsed or supported by Anthropic.</p></details>
+  </div>
+</div></section>
+
+<section id="donate"><div class="wrap">
+  <div class="donate">
+    <div>
+      <h2>Free to use <span class="blob flower"></span> kept going by kindness.</h2>
+      <p>Dafina is free and always will be. If it's earned a place in your workflow, a small donation helps me keep improving it.</p>
+    </div>
+    <a class="btn js-kofi" href="#">Buy me a coffee</a>
+  </div>
+</div></section>
+
+<div class="wrap">
+  <footer>
+    <p>Dafina is designed and made by Sue Rutherford in South Africa. It's an independent project that works with Claude and isn't made, endorsed or supported by Anthropic.</p>
+    <p><a href="#install">Install</a> · <a class="js-github" href="#">GitHub</a> · <a class="js-kofi" href="#">Donate</a></p>
+  </footer>
+</div>
+
+<div class="toast" id="toast">Copied. Now paste it into Terminal.</div>
+
+<script>
+  // ——— Fill these in before publishing ———
+  const CONFIG = {
+    github: "suerutherford71/dafina",          // GitHub user/repo that holds the app and install.sh
+    kofi: "https://ko-fi.com/YOUR-NAME",    // your Ko-fi page
+    chromeStore: ""                         // Chrome Web Store link, once the extension is listed
+  };
+
+  const cmd = `curl -fsSL https://raw.githubusercontent.com/${CONFIG.github}/main/install.sh | bash`;
+  document.getElementById("cmd").textContent = cmd;
+  document.querySelectorAll(".js-kofi").forEach(a => { a.href = CONFIG.kofi; a.target = "_blank"; a.rel = "noopener"; });
+  document.querySelectorAll(".js-github").forEach(a => { a.href = `https://github.com/${CONFIG.github}`; });
+  document.querySelectorAll(".js-script").forEach(a => { a.href = `https://github.com/${CONFIG.github}/blob/main/install.sh`; });
+  if (CONFIG.chromeStore) document.querySelectorAll(".js-chrome").forEach(a => { a.href = CONFIG.chromeStore; a.target = "_blank"; a.rel = "noopener"; });
+  else document.querySelectorAll(".js-chrome").forEach(a => a.addEventListener("click", () => { const d = document.getElementById("faq-chrome"); if (d) d.open = true; }));
+
+  const toast = document.getElementById("toast");
+  document.getElementById("copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(cmd); }
+    catch (e) { const r = document.createRange(); r.selectNodeContents(document.getElementById("cmd")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand("copy"); }
+    toast.classList.add("on"); setTimeout(() => toast.classList.remove("on"), 2200);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "Save to Dafina",
+  "id": "save-to-dafina-local",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"],
+    "devAllowedDomains": ["http://localhost:4610"],
+    "reasoning": "Sends the frames you choose to the Dafina app running on your own computer."
+  }
+}

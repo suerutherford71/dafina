@@ -1,0 +1,25 @@
+# This folder is also Sue's own working library, so ignore EVERYTHING by default
+# and only let the app's own files into the public repo.
+# Never published: sources/ (your images), catalogue.json (your labels), trash/,
+# Share/, Exports/, .claude/launch.json, .DS_Store.
+/*
+
+!/.gitignore
+!/README.md
+!/LICENCE.txt
+!/CLAUDE.md
+!/install.sh
+!/server.py
+!/index.html
+!/Start Catalogue.command
+!/chrome-extension/
+!/figma-plugin/
+!/website/
+!/.github/
+
+!/.claude/
+/.claude/*
+!/.claude/skills/
+
+.DS_Store
+__pycache__/

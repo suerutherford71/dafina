@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Save to Dafina",
+  "version": "1.0",
+  "description": "Save the page you're looking at, or any image on it, to your Dafina design inspiration library, with its link. By Sue Rutherford.",
+  "action": {
+    "default_title": "Save to Dafina",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/16.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost:4610/*"
+  ],
+  "author": "Sue Rutherford"
+}

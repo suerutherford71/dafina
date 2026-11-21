@@ -1,0 +1,32 @@
+DAFINA — LICENCE
+================
+
+Dafina is free. You don't need to pay anything to use it.
+
+YOU MAY
+- Download, install and use Dafina on as many of your own computers as you like.
+- Use it for personal projects and for paid client or commercial work.
+- Change the code (index.html, server.py and the other files) to suit yourself.
+- Share the link to Dafina's website or GitHub page with anyone.
+
+YOU MAY NOT
+- Sell Dafina, or a changed copy of it, or charge people to get it.
+- Bundle Dafina into a paid product or service.
+- Present Dafina, or a changed copy of it, as your own product.
+- Remove Sue Rutherford's name or this licence from the files.
+
+ABOUT CLAUDE
+Dafina works with Claude, made by Anthropic. Dafina is an independent
+project. It is not made, endorsed or supported by Anthropic. You need
+your own Claude account and plan to use the labelling features.
+
+NO WARRANTY
+Dafina is provided "as is", without any warranty. You are responsible
+for backing up your images and labels. Sue Rutherford is not liable for any
+loss or damage that comes from using it.
+
+Your images stay yours. Dafina never uploads them anywhere; they stay
+in your own folder on your own computer.
+
+Dafina was designed and made by Sue Rutherford.
+© 2026 Sue Rutherford. All rights reserved except as granted above.

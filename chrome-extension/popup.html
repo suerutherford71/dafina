@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Save to Dafina</title>
+<style>
+  :root{--bg:#f2f2f2;--white:#fff;--ink:#171717;--ink-2:rgba(0,0,0,.55);--ink-3:rgba(0,0,0,.4);--green:#1cc691;--coral:#ff6b4a;--yellow:#fde3a0}
+  @media (prefers-color-scheme:dark){:root{--bg:#121212;--white:#1f1f1f;--ink:#f2f2f2;--ink-2:rgba(255,255,255,.64);--ink-3:rgba(255,255,255,.44);--yellow:#4b3f1c}}
+  *{box-sizing:border-box}
+  body{margin:0;width:360px;background:var(--bg);color:var(--ink);font:14px/1.4 -apple-system,"Plus Jakarta Sans",system-ui,sans-serif}
+  .wrap{padding:16px;display:grid;gap:12px}
+  .head{display:flex;align-items:center;gap:10px}
+  .head img{width:28px;height:28px;border-radius:7px}
+  .head b{font-size:20px;font-weight:800;letter-spacing:-.03em}
+  .head a{margin-left:auto;color:var(--ink-2);font-weight:600;font-size:13px;text-decoration:none}
+  label{display:grid;gap:4px;font-size:12px;font-weight:700;color:var(--ink-2)}
+  input,select,textarea{font:inherit;color:var(--ink);background:var(--white);border:0;border-radius:10px;padding:9px 11px;outline:none;width:100%}
+  input:focus,select:focus,textarea:focus{box-shadow:0 0 0 2px var(--ink)}
+  textarea{resize:vertical;min-height:54px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .url{font-size:12px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:-6px}
+  button{font:inherit;font-weight:700;border:0;border-radius:12px;padding:11px 14px;cursor:pointer}
+  .primary{background:var(--ink);color:var(--bg)}
+  .secondary{background:var(--white);color:var(--ink)}
+  button:disabled{opacity:.5;cursor:default}
+  .msg{border-radius:10px;padding:10px 12px;font-weight:600;font-size:13px}
+  .msg.ok{background:#c4e6d4;color:#14432f}
+  .msg.bad{background:#fde2dc;color:#7a2414}
+  .msg.info{background:var(--yellow)}
+  .hint{font-size:12px;color:var(--ink-3);margin:-4px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head"><img src="icons/48.png" alt=""><b>dafina</b><a href="http://localhost:4610" target="_blank">Open library ↗</a></div>
+  <div id="offline" class="msg info" hidden>Dafina isn't running. Double-click <b>Start Catalogue.command</b> in your Dafina folder, then click the button again.</div>
+  <div id="form">
+    <div style="display:grid;gap:12px">
+      <label>Title<input id="title"></label>
+      <div class="url" id="url"></div>
+      <div class="two">
+        <label>Category<select id="cat"></select></label>
+        <label>Sub-folder<input id="sub" list="subs" placeholder="optional"><datalist id="subs"></datalist></label>
+      </div>
+      <label>Note for Claude<textarea id="note" placeholder="optional, e.g. love the type"></textarea></label>
+      <button class="primary" id="saveView">Save what I see</button>
+      <button class="secondary" id="saveLong">Save a longer capture</button>
+      <p class="hint">"Longer capture" takes a fresh screenshot of about three screens in the background, as a first-time visitor would see it. Right-click any image on a page to save just that image.</p>
+      <div id="msg" class="msg" hidden></div>
+    </div>
+  </div>
+</div>
+<script src="popup.js"></script>
+</body>
+</html>

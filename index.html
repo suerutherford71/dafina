@@ -164,6 +164,34 @@
   .labelbar .txt b{font-weight:700}
   .labelbar .steps{display:block;font-size:14px;color:var(--ink-2);margin-top:2px}
 
+  /* Getting started: shown to new users until the three steps are done (or they hide it) */
+  .onboard{background:var(--white);border-radius:20px;padding:22px;margin:0 0 22px}
+  .onboard .ohead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 4px 16px}
+  .onboard .ohead h2{margin:0;font-size:24px;font-weight:700;letter-spacing:-.02em}
+  .onboard .ohead .prog{font-size:14px;font-weight:600;color:var(--ink-2)}
+  .onboard .ohead .grow{flex:1}
+  .osteps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;list-style:none;margin:0;padding:0;counter-reset:ostep}
+  @media (max-width:980px){.osteps{grid-template-columns:1fr}}
+  .ostep{background:var(--c);border-radius:var(--r-lg);padding:18px 18px 20px;display:flex;flex-direction:column;gap:10px;counter-increment:ostep}
+  .ostep .num{width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:700;font-size:15px;flex:none}
+  .ostep .num::before{content:counter(ostep)}
+  .ostep.done .num{background:var(--green);color:#fff}
+  .ostep.done .num::before{content:"✓"}
+  .ostep .top{display:flex;align-items:center;gap:12px}
+  .ostep h3{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em;line-height:1.2}
+  .ostep h3 small{display:block;font-size:13px;font-weight:600;color:var(--ink-2);letter-spacing:0;margin-top:2px}
+  .ostep p{margin:0;font-size:15px;line-height:1.5;font-weight:500;color:var(--text-2)}
+  .ostep ol{margin:0;padding-left:20px;font-size:15px;line-height:1.55;font-weight:500;color:var(--text-2)}
+  .ostep ol li{margin:2px 0}
+  .ostep code{background:var(--code);padding:2px 6px;border-radius:6px;overflow-wrap:anywhere}
+  .ostep .obtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
+  .ostep .obtns .btn{background:var(--white)}
+  .ostep .obtns .btn.dark{background:var(--ink);color:var(--bg)}
+  .ostep .small{font-size:13px;color:var(--ink-2)}
+  .ostep .small a{font-weight:600}
+  .onboard .ofoot{margin:14px 4px 0;font-size:14px;line-height:1.5;font-weight:500;color:var(--ink-2)}
+  .onboard .ofoot b{color:var(--ink)}
+
   /* forms */
   .form{display:grid;gap:14px}
   .form label{display:grid;gap:6px;font-size:13px;font-weight:700;color:var(--ink-2)}
@@ -375,6 +403,7 @@
   </div>
 
   <p class="intro" id="intro">&nbsp;</p>
+  <section id="onboard" aria-label="Getting started"></section>
 
   <div id="stickymark" aria-hidden="true"></div>
   <div class="stickybar" id="stickybar">
@@ -422,6 +451,8 @@
         <li>Keep that small Terminal window open while you use the catalogue. Closing it stops the catalogue.</li>
         <li>The green <b>Live</b> dot (top right) means the catalogue is watching your folders. If it turns red, the catalogue has stopped. Double-click the start file again.</li>
       </ol>
+      <p><b>Where is the Dafina folder?</b> In your home folder, for example <code>/Users/alex/Dafina</code>. In Finder, press <b>⇧⌘H</b> to open your home folder, or choose <b>Go → Go to Folder…</b> and type <code>~/Dafina</code>. Drag it to Finder's sidebar to keep it handy.</p>
+      <p>New to Dafina? The three-step <b>Getting started</b> guide walks you through adding, labelling and using your first images. <button class="btn sm dark" data-onboardshow>Show Getting started</button></p>
     </section>
 
     <section id="h-add" style="--c:var(--yellow)">
@@ -588,8 +619,7 @@ async function api(path, body) {
 /* ---------------- live sync ---------------- */
 async function load() {
   const st = await api("/api/state");
-  S.categories = st.categories; S.items = st.items; S.v = st.v;
-  if (S.sel.size) { const have = new Set(S.items.map(i => i.hash)); S.sel.forEach(h => { if (!have.has(h)) S.sel.delete(h); }); }
+  S.categories = st.categories; S.items = st.items; S.v = st.v;  if (S.sel.size) { const have = new Set(S.items.map(i => i.hash)); S.sel.forEach(h => { if (!have.has(h)) S.sel.delete(h); }); }
   if (S.cat !== "all" && S.cat !== "awaiting" && !S.categories.some(c => c.name === S.cat)) { S.cat = "all"; S.sub = ""; }
   render();
   if (S.open && $("#detail").classList.contains("open") && !$("#editForm")) {
@@ -675,6 +705,8 @@ function render() {
   $("#filters").innerHTML = S.tags.length ? `Filtering by ${S.tags.map(t => `<span class="chip tag" data-untag="${esc(t)}">${esc(t)}</span>`).join("")} <button class="btn sm ghost" data-cleartags>Clear</button>` : "";
   $("#favBtn").classList.toggle("on", S.favOnly);
 
+  $("#onboard").innerHTML = onboarding(total, waiting);
+
   $("#labelbar").innerHTML = S.cat === "awaiting" && waiting
     ? `<div class="labelbar"><div class="txt"><b>${waiting} image${waiting === 1 ? " is" : "s are"} waiting for Claude.</b><span class="steps">The button copies <b>label my dafina</b> and opens the Claude app. In the <b>Code</b> tab, start a session in your <b>Dafina</b> folder, paste (⌘V) and press Return.</span></div><button class="btn dark" data-labelnow>Label with Claude</button></div>` : "";
   const list = S.view = filtered();
@@ -714,6 +746,55 @@ function card(e, i) {
       <div class="foot"><span>${esc(where(e))}</span>${pal.length ? `<span class="swatches">${pal.map(h => `<i style="background:${esc(h)}"></i>`).join("")}</span>` : ""}</div>
     </div></article>`;
 }
+/* ---------------- getting started ----------------
+   localStorage "dafina-onboard": "on" (show it), "hidden" (they closed it), or missing.
+   Missing + nothing labelled yet = a new user, so it switches on. Missing + labels already = an existing library, so it stays away.
+   "dafina-opened" remembers that they've opened a card, which ticks step 3. */
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
+let onboardMem = null;   // used when the browser won't let us store anything
+function onboardMode(labelled) {
+  let m = store.get("dafina-onboard") || onboardMem;
+  if (!m) { m = labelled ? "hidden" : "on"; onboardMem = m; if (!labelled) store.set("dafina-onboard", "on"); }
+  return m;
+}
+function setOnboard(m) { onboardMem = m; store.set("dafina-onboard", m); render(); }
+function onboarding(total, waiting) {
+  const labelled = total - waiting;
+  if (onboardMode(labelled) !== "on") return "";
+  const opened = !!(store.get("dafina-opened") || S.openedOnce);
+  const done = [total > 0, labelled > 0, opened];
+  const n = done.filter(Boolean).length;
+  const cls = i => `ostep${done[i] ? " done" : ""}`;
+  return `<div class="onboard">
+    <div class="ohead"><h2>${n === 3 ? "You're all set" : "Getting started"}</h2><span class="prog">${n} of 3 done</span><span class="grow"></span>
+      <button class="btn sm ghost" data-onboardhide>${n === 3 ? "Close" : "Hide for now"}</button></div>
+    <ol class="osteps">
+      <li class="${cls(0)}" style="--c:var(--blue)">
+        <div class="top"><span class="num"></span><h3>Add some inspiration<small>${total ? `${total} added` : "Screenshots, images or website links"}</small></h3></div>
+        <p>Drag images onto this page, paste a screenshot with <b>⌘V</b>, or save a website by its link. Each one goes into a category folder, like <i>Logos</i> or <i>Web design</i>.</p>
+        <div class="obtns"><button class="btn sm dark" data-onboardadd="upload">+ Add images</button><button class="btn sm" data-onboardadd="web">Save a website</button></div>
+      </li>
+      <li class="${cls(1)}" style="--c:var(--yellow)">
+        <div class="top"><span class="num"></span><h3>Ask Claude to label them<small>${labelled ? `${labelled} labelled${waiting ? `, ${waiting} waiting` : ""}` : waiting ? `${waiting} waiting for labels` : "Titles, colours, styles and prompts"}</small></h3></div>
+        <p>Dafina doesn't describe images itself. <b>Claude</b> does, using the Code tab in the Claude desktop app.</p>
+        <ol>
+          <li>Open the <b>Claude</b> app and go to the <b>Code</b> tab.</li>
+          <li>Choose your <b>Dafina</b> folder (see below for where it is).</li>
+          <li>Type <b>label my dafina</b> and press Return.</li>
+        </ol>
+        <div class="obtns"><button class="btn sm dark" data-labelnow>Copy it and open Claude</button></div>
+        <p class="small">No Claude app yet? <a href="https://claude.ai/download" target="_blank" rel="noopener">Download it here</a>. The Code tab needs a paid Claude plan.</p>
+      </li>
+      <li class="${cls(2)}" style="--c:var(--mint)">
+        <div class="top"><span class="num"></span><h3>Find and use it<small>Search, browse, copy</small></h3></div>
+        <p><b>Click any card</b> to see its full description, colour palette and image prompt, with buttons to copy them. Search by colour, style or mood, or click a category to browse.</p>
+        <div class="obtns"><button class="btn sm" data-onboardhelp="h-use">How to use an item</button><button class="btn sm" data-onboardhelp="h-add">Save from Chrome or Figma</button></div>
+      </li>
+    </ol>
+    <p class="ofoot"><b>Where is my Dafina folder?</b> The installer puts it in your <b>home folder</b> (the one with your name and a house icon), for example <code>/Users/alex/Dafina</code>. To open it, go to Finder, press <b>⇧⌘H</b> to open your home folder, then open <b>Dafina</b>. Or choose <b>Go → Go to Folder…</b> in Finder's menu bar and type <code>~/Dafina</code>.</p>
+    <p class="ofoot"><b>Next time you want Dafina:</b> double-click <b>Start Catalogue</b> in your Dafina folder and keep its Terminal window open while you use it. Closing that window stops Dafina.</p>
+  </div>`;
+}
 function emptyState() {
   if (S.items.length && (S.q || S.tags.length || S.favOnly)) return `<div class="empty"><h2>Nothing matches</h2><p>Try clearing the search or tag filters.</p></div>`;
   if (S.cat === "awaiting") return `<div class="empty"><h2>All caught up</h2><p>Everything has labels. New images you add will wait here until Claude describes them.</p></div>`;
@@ -736,6 +817,7 @@ function briefText(e) {
 }
 function openDetail(e) {
   S.open = e;
+  if (!S.openedOnce) { S.openedOnce = true; store.set("dafina-opened", "1"); if ($("#onboard").innerHTML) setTimeout(render); }   // ticks Getting started step 3
   const title = e.title || stem(e.file), tags = e.tags || [], pal = e.palette || [];
   const crumbs = esc(where(e));
   $("#detailBox").innerHTML = `
@@ -1201,6 +1283,14 @@ document.addEventListener("click", async ev => {
   const cardEl = ev.target.closest("#grid .card");
   if (cardEl && (ev.target.closest("[data-tick]") || S.sel.size)) { ev.preventDefault(); return toggleSel(+cardEl.dataset.i, ev.shiftKey); }
   if (ev.target.closest("[data-labelnow]")) return labelNow();
+  const ob = ev.target.closest("[data-onboardhide],[data-onboardshow],[data-onboardadd],[data-onboardhelp]");
+  if (ob) {
+    const b = ob.dataset;
+    if (b.onboardhide !== undefined) return setOnboard("hidden");
+    if (b.onboardshow !== undefined) { closeAll(); setOnboard("on"); return scrollTo({ top: 0 }); }
+    if (b.onboardadd) return openAdder(null, b.onboardadd);
+    if (b.onboardhelp) { openHelp(); const sec = document.getElementById(b.onboardhelp); if (sec) sec.scrollIntoView(); return; }
+  }
   if (ev.target.closest("[data-rename]")) return openRename();
   if (ev.target.closest("[data-dorename]")) return doRename(ev.target.closest("[data-dorename]"));
   const bk = ev.target.closest("[data-selall],[data-selnone],[data-bulkcopy],[data-bulkedit],[data-bulkfav],[data-bulkdel],[data-bulksave],[data-rmtag]");
